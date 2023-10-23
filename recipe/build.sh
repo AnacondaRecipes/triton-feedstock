@@ -10,4 +10,4 @@ export LLVM_INCLUDE_DIRS="$PREFIX/include"
 rm -rf $SRC_DIR/include/triton/external/CUDA
 
 cd python
-$PYTHON -m pip install . -vv
+$PYTHON -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vv

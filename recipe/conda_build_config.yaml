@@ -2,7 +2,7 @@
 # https://docs.nvidia.com/cuda/archive/11.8.0/cuda-installation-guide-linux/index.html
 cuda_compiler_version:
   - 11.8
-c_compiler_version:
+c_compiler_version:     # [linux and x86_64]
   - 11
-cxx_compiler_version:
+cxx_compiler_version:   # [linux and x86_64]
   - 11
