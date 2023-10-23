@@ -1,0 +1,8 @@
+# We need to ensure that the gcc and cuda versions are compatible, see
+# https://docs.nvidia.com/cuda/archive/11.8.0/cuda-installation-guide-linux/index.html
+cuda_compiler_version:
+  - 11.8
+c_compiler_version:
+  - 11
+cxx_compiler_version:
+  - 11
