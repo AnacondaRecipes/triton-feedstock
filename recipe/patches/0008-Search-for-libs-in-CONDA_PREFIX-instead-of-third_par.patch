@@ -11,20 +11,19 @@ Subject: [PATCH 8/8] Search for libs in CONDA_PREFIX instead of third_party
  python/triton/tools/build_extern.py     |  3 ++-
  4 files changed, 21 insertions(+), 27 deletions(-)
 
-diff --git a/lib/Target/LLVMIR/LLVMIRTranslation.cpp b/lib/Target/LLVMIR/LLVMIRTranslation.cpp
-index cfb79868d..bcb31b078 100644
---- a/lib/Target/LLVMIR/LLVMIRTranslation.cpp
-+++ b/lib/Target/LLVMIR/LLVMIRTranslation.cpp
-@@ -129,31 +129,21 @@ static std::map<std::string, std::string> getExternLibs(mlir::ModuleOp module) {
-       }
-       return std::filesystem::path(fileinfo.dli_fname);
-     }();
+Index: triton/lib/Target/LLVMIR/LLVMIRTranslation.cpp
+===================================================================
+--- triton.orig/lib/Target/LLVMIR/LLVMIRTranslation.cpp	2023-10-25 13:13:36.017681564 -0500
++++ triton/lib/Target/LLVMIR/LLVMIRTranslation.cpp	2023-10-25 13:19:56.022624128 -0500
+@@ -188,31 +188,20 @@
+     // Then native code is in `triton/_C/libtriton.so` and libdevice in
+     // `triton/third_party/cuda/lib/libdevice.10.bc`
+     static const auto this_library_path = getThisLibraryPath();
 -    static const auto runtime_path =
 -        this_library_path.parent_path().parent_path() / "third_party" / "cuda" /
 -        "lib" / "libdevice.10.bc";
 -    if (fs::exists(runtime_path)) {
 -      externLibs.try_emplace(libdevice, runtime_path.string());
-+
 +    const char* conda_prefix_cstr = std::getenv("CONDA_PREFIX");
 +    if (!conda_prefix_cstr) {
 +        llvm::report_fatal_error("CONDA_PREFIX environment variable not set.");
@@ -60,12 +59,27 @@ index cfb79868d..bcb31b078 100644
      }
    }
  
-diff --git a/python/triton/compiler.py b/python/triton/compiler.py
-index 7ddb87a99..adfb67575 100644
---- a/python/triton/compiler.py
-+++ b/python/triton/compiler.py
-@@ -1064,7 +1064,8 @@ def path_to_ptxas():
-     base_dir = os.path.dirname(__file__)
+Index: triton/python/triton/tools/build_extern.py
+===================================================================
+--- triton.orig/python/triton/tools/build_extern.py	2023-10-25 13:13:36.020098844 -0500
++++ triton/python/triton/tools/build_extern.py	2023-10-25 13:46:17.752162532 -0500
+@@ -296,9 +296,8 @@
+         header_str += "@functools.lru_cache()\n"
+         header_str += "def libdevice_path():\n"
+         header_str += "    import torch\n"
+-        header_str += "    third_party_dir =  os.path.join(os.path.dirname(os.path.abspath(__file__)), \"..\", \"third_party\")\n"
+         header_str += "    if torch.version.hip is None:\n"
+-        header_str += "        default = os.path.join(third_party_dir, \"cuda\", \"lib\", \"libdevice.10.bc\")\n"
++        header_str += "        default = os.path.join(os.environ[\"CONDA_PREFIX\"], \"lib\", \"libdevice.10.bc\")\n"
+         header_str += "    else:\n"
+         header_str += "        default = ''\n"
+         header_str += "    return os.getenv(\"TRITON_LIBDEVICE_PATH\", default)\n"
+Index: triton/python/triton/common/backend.py
+===================================================================
+--- triton.orig/python/triton/common/backend.py	2023-10-24 12:41:54.513797568 -0500
++++ triton/python/triton/common/backend.py	2023-10-25 13:22:03.726438439 -0500
+@@ -105,7 +105,8 @@
+     base_dir = os.path.join(os.path.dirname(__file__), os.pardir)
      paths = [
          os.environ.get("TRITON_PTXAS_PATH", ""),
 -        os.path.join(base_dir, "third_party", "cuda", "bin", "ptxas")
@@ -74,41 +88,36 @@ index 7ddb87a99..adfb67575 100644
      ]
  
      for ptxas in paths:
-@@ -1368,7 +1369,8 @@ def _build(name, src, srcdir):
-     cuda_path = os.environ.get('CUDA_PATH', default_cuda_dir())
-     cu_include_dir = os.path.join(cuda_path, "include")
-     base_dir = os.path.dirname(__file__)
--    triton_include_dir = os.path.join(base_dir, "third_party/cuda/include")
-+    triton_include_dir = os.path.join(os.environ['CONDA_PREFIX'], "include")
-+    # triton_include_dir = os.path.join(base_dir, "third_party/cuda/include")
-     cuda_header = os.path.join(cu_include_dir, "cuda.h")
-     triton_cuda_header = os.path.join(triton_include_dir, "cuda.h")
-     if not os.path.exists(cuda_header) and os.path.exists(triton_cuda_header):
-diff --git a/python/triton/language/libdevice.py b/python/triton/language/libdevice.py
-index a43780589..7c8c12aef 100644
---- a/python/triton/language/libdevice.py
-+++ b/python/triton/language/libdevice.py
-@@ -3,7 +3,8 @@ import os
- from .. import impl
- from . import core, extern
+Index: triton/python/triton/common/build.py
+===================================================================
+--- triton.orig/python/triton/common/build.py	2023-10-25 13:32:41.014410006 -0500
++++ triton/python/triton/common/build.py	2023-10-25 13:33:05.732610953 -0500
+@@ -48,9 +48,9 @@
  
--LIBDEVICE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "third_party", "cuda", "lib", "libdevice.10.bc")
-+# LIBDEVICE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "third_party", "cuda", "lib", "libdevice.10.bc")
-+LIBDEVICE_PATH = os.path.join(os.environ["CONDA_PREFIX"], "lib", "libdevice.10.bc")
+ @functools.lru_cache()
+ def cuda_include_dir():
+-    base_dir = os.path.join(os.path.dirname(__file__), os.path.pardir)
+-    cuda_path = os.path.join(base_dir, "third_party", "cuda")
+-    return os.path.join(cuda_path, "include")
++    #base_dir = os.path.join(os.path.dirname(__file__), os.path.pardir)
++    #cuda_path = os.path.join(base_dir, "third_party", "cuda")
++    return os.path.join(os.environ['CONDA_PREFIX'], "include")
  
  
- @impl.extern
-diff --git a/python/triton/tools/build_extern.py b/python/triton/tools/build_extern.py
-index 22011c273..d9a0ff9af 100644
---- a/python/triton/tools/build_extern.py
-+++ b/python/triton/tools/build_extern.py
-@@ -289,7 +289,8 @@ class Libdevice(ExternLibrary):
-         #   return extern.dispatch("libdevice", <path>, <args>, <arg_type_symbol_dict>, _builder)
-         import_str = "from . import core, extern\n"
-         import_str += "import os\n"
--        header_str = "LIBDEVICE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"..\", \"third_party\", \"cuda\", \"lib\", \"libdevice.10.bc\")"
-+        # header_str = "LIBDEVICE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"..\", \"third_party\", \"cuda\", \"lib\", \"libdevice.10.bc\")"
-+        header_str = "LIBDEVICE_PATH = os.path.join(os.path.dirname(os.environ[\"CONDA_PREFIX\"], \"lib\", \"libdevice.10.bc\")"
-         func_str = ""
-         for symbols in self._symbol_groups.values():
-             func_str += "@extern.extern\n"
+ def _build(name, src, srcdir):
+Index: triton/python/triton/language/math.py
+===================================================================
+--- triton.orig/python/triton/language/math.py	2023-10-24 12:41:54.517205563 -0500
++++ triton/python/triton/language/math.py	2023-10-25 13:40:29.839500441 -0500
+@@ -7,9 +7,9 @@
+ @functools.lru_cache()
+ def libdevice_path():
+     import torch
+-    third_party_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "third_party")
++    #third_party_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "third_party")
+     if torch.version.hip is None:
+-        default = os.path.join(third_party_dir, "cuda", "lib", "libdevice.10.bc")
++        default = os.path.join(os.environ["CONDA_PREFIX"], "lib", "libdevice.10.bc")
+     else:
+         default = ''
+     return os.getenv("TRITON_LIBDEVICE_PATH", default)
