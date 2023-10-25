@@ -7,11 +7,19 @@ package:
 source:
   git_url: https://github.com/openai/triton.git
   git_rev: e6216047b8b0aef1fe8da6ca8667a3ad0a016411
+  patches:
+    - patches/0001-do-not-package-third_party-folder.patch
+    - patches/0002-Fix-error-that-FileCheck-is-already-defined.patch
+    - patches/0003-properly-point-to-triton-includes.patch
+    - patches/0004-Avoid-using-outdated-FindLLVM.patch
+    - patches/0005-Unvendor-third-party-libs.patch
+    - patches/0006-Avoid-pip-check-error-as-cmake-is-not-a-python-modul.patch
+    - patches/0007-Fix-TableGen-issues.patch
+    - patches/0008-Search-for-libs-in-CONDA_PREFIX-instead-of-third_par.patch
   
 build:
   number: 0
-  # Currently we need this to support PyTorch's torch.compile feature on Nvidia GPUs, and this is the only platform we
-  # support for that.
+  # Currently we need this to support PyTorch's torch.compile feature on Nvidia GPUs, linux-64.
   skip: true  # [not (linux and x86_64)]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
@@ -20,17 +28,22 @@ requirements:
     - {{ compiler('cxx') }}
     - make
     - cmake
+    - mlir
+    - llvmdev
   host:
     - cudatoolkit {{ cuda_compiler_version }}*
     - python
+    - pybind11
     - pip
-    - llvmdev 11
+    - llvm
+    - mlir
     - zlib
   run:
     - python
     - filelock
-    - pytorch
+    - pytorch-gpu
     - lit
+    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}
 
 test:
   imports:
@@ -54,7 +67,7 @@ about:
   license: MIT
   license_family: MIT
   license_file: LICENSE
-  summary: 'Development repository for the Triton language and compiler'
+  summary: Development repository for the Triton language and compiler
   description: |
     This is the development repository of Triton, a language and compiler for writing highly efficient custom Deep-Learning primitives.
     The aim of Triton is to provide an open-source environment to write fast code at higher productivity than CUDA, but also with higher flexibility than other existing DSLs.

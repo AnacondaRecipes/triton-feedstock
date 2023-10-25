@@ -6,3 +6,11 @@ c_compiler_version:     # [linux and x86_64]
   - 11
 cxx_compiler_version:   # [linux and x86_64]
   - 11
+llvmdev:
+  - 14
+llvm:
+  - 14
+mlir:
+  - 14
+libmlir:
+  - 14
