@@ -9,8 +9,8 @@ Subject: [PATCH 7/8] Fix TableGen issues
 
 Index: triton/CMakeLists.txt
 ===================================================================
---- triton.orig/CMakeLists.txt	2023-10-25 12:41:12.565804497 -0500
-+++ triton/CMakeLists.txt	2023-10-25 12:42:18.662153687 -0500
+--- triton.orig/CMakeLists.txt	2023-10-26 17:05:39.406540418 -0500
++++ triton/CMakeLists.txt	2023-10-26 17:06:15.006260578 -0500
 @@ -71,7 +71,7 @@
          AMDGPUInfo AMDGPUcodegen
        )
@@ -20,15 +20,6 @@ Index: triton/CMakeLists.txt
      endif()
  
      message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-@@ -175,7 +175,7 @@
- # endif()
- 
- # MLIR
--find_package(MLIR REQUIRED CONFIG PATHS ${MLIR_DIR})
-+find_package(MLIR REQUIRED)
- 
- list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
- list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 @@ -184,6 +184,31 @@
  include(AddLLVM)
  include(AddMLIR)
