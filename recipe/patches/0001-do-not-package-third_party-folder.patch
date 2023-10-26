@@ -9,9 +9,16 @@ Subject: [PATCH 1/8] do not package third_party folder
 
 Index: triton/python/setup.py
 ===================================================================
---- triton.orig/python/setup.py	2023-10-25 11:55:17.788736517 -0500
-+++ triton/python/setup.py	2023-10-25 11:55:56.504420795 -0500
-@@ -290,7 +290,7 @@
+--- triton.orig/python/setup.py	2023-10-25 13:50:40.857312000 -0500
++++ triton/python/setup.py	2023-10-26 16:45:44.845150639 -0500
+@@ -284,13 +284,13 @@
+         "triton/ops/blocksparse",
+         "triton/runtime",
+         "triton/runtime/backends",
+-        "triton/third_party",
++        #"triton/third_party",
+         "triton/tools",
+     ],
      install_requires=[
          "filelock",
      ],
@@ -22,8 +29,8 @@ Index: triton/python/setup.py
      zip_safe=False,
 Index: triton/python/MANIFEST.in
 ===================================================================
---- triton.orig/python/MANIFEST.in	2023-10-24 12:41:32.099360976 -0500
-+++ triton/python/MANIFEST.in	2023-10-25 11:55:40.380093673 -0500
+--- triton.orig/python/MANIFEST.in	2023-10-25 13:50:40.857220000 -0500
++++ triton/python/MANIFEST.in	2023-10-26 16:42:20.984487467 -0500
 @@ -1,5 +1,4 @@
  graft src
 -graft triton/third_party
