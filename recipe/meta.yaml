@@ -26,15 +26,15 @@ requirements:
     - {{ compiler('cxx') }}
     - make
     - cmake
-    - mlir
-    - llvmdev
+    #- mlir
+    #- llvmdev
   host:
     - cudatoolkit {{ cuda_compiler_version }}*
     - python
     - pybind11
     - pip
-    - llvm
-    - mlir
+    #- llvm
+    #- mlir
     - zlib
   run:
     - python
