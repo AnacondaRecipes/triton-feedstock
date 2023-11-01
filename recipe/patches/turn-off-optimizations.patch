@@ -1,15 +1,15 @@
 Index: triton/CMakeLists.txt
 ===================================================================
 --- triton.orig/CMakeLists.txt	2023-11-01 15:26:30.474342086 -0500
-+++ triton/CMakeLists.txt	2023-11-01 16:01:27.530009884 -0500
++++ triton/CMakeLists.txt	2023-11-01 16:47:06.767686468 -0500
 @@ -28,8 +28,8 @@
  # used conditionally in this file and by lit tests
  
  # Customized release build type with assertions: TritonRelBuildWithAsserts
 -set(CMAKE_C_FLAGS_TRITONRELBUILDWITHASSERTS "-O2 -g")
 -set(CMAKE_CXX_FLAGS_TRITONRELBUILDWITHASSERTS "-O2 -g")
-+set(CMAKE_C_FLAGS_TRITONRELBUILDWITHASSERTS "-g")
-+set(CMAKE_CXX_FLAGS_TRITONRELBUILDWITHASSERTS "-g")
++#set(CMAKE_C_FLAGS_TRITONRELBUILDWITHASSERTS "-g")
++#set(CMAKE_CXX_FLAGS_TRITONRELBUILDWITHASSERTS "-g")
  
  # Default build type
  if(NOT CMAKE_BUILD_TYPE)
