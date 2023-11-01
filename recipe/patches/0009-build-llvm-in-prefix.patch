@@ -1,0 +1,18 @@
+Index: triton/python/setup.py
+===================================================================
+--- triton.orig/python/setup.py	2023-11-01 15:26:30.436694553 -0500
++++ triton/python/setup.py	2023-11-01 15:28:31.429521872 -0500
+@@ -202,11 +202,9 @@
+ 
+     def build_extension(self, ext):
+         lit_dir = shutil.which('lit')
+-        user_home = os.getenv("HOME") or os.getenv("USERPROFILE") or \
+-            os.getenv("HOMEPATH") or None
++        triton_cache_path = os.getenv("PREFIX") or None
+         if not user_home:
+-            raise RuntimeError("Could not find user home directory")
+-        triton_cache_path = os.path.join(user_home, ".triton")
++            raise RuntimeError("Could not find prefix")
+         # lit is used by the test suite
+         thirdparty_cmake_args = get_thirdparty_packages(triton_cache_path)
+         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.path)))
