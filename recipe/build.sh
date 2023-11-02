@@ -5,8 +5,10 @@ set -ex
 # remove outdated vendored headers
 rm -rf $SRC_DIR/python/triton/third_party
 
-# direct CMake towards MLIR library directory
-export MLIR_DIR="$PREFIX/lib"
+# direct CMake towards LLVM library directory
+export LLVM_INCLUDE_DIRS="$SRC_DIR/include"
+export LLVM_LIBRARY_DIR="$SRC_DIR/lib"
+export LLVM_SYSPATH="$SRC_DIR"
 
 export CFLAGS="$(echo $CFLAGS | sed 's/-O[0-9]//g')"
 export CXXFLAGS="$(echo $CXXFLAGS | sed 's/-O[0-9]//g')"
