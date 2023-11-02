@@ -6,7 +6,7 @@ set -ex
 rm -rf $SRC_DIR/python/triton/third_party
 
 # direct CMake towards LLVM library directory
-export MLIR_DIR="$SRC_DIR"
+export MLIR_DIR="$PREFIX/lib"
 export LLVM_INCLUDE_DIRS="$SRC_DIR/include"
 export LLVM_LIBRARY_DIR="$SRC_DIR/lib"
 export LLVM_SYSPATH="$SRC_DIR"
