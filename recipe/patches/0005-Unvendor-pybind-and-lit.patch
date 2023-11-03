@@ -47,3 +47,25 @@ Index: triton/python/setup.py
          cmake_args.extend(thirdparty_cmake_args)
  
          # configuration
+Index: triton/python/triton/common/backend.py
+===================================================================
+--- triton.orig/python/triton/common/backend.py	2023-11-02 16:11:36.065089000 -0500
++++ triton/python/triton/common/backend.py	2023-11-03 15:11:36.974785184 -0500
+@@ -107,13 +107,17 @@
+         os.environ.get("TRITON_PTXAS_PATH", ""),
+         os.path.join(base_dir, "third_party", "cuda", "bin", "ptxas")
+     ]
++    print(f"paths:{paths}")
+ 
+     for ptxas in paths:
+         ptxas_bin = ptxas.split(" ")[0]
+         if os.path.exists(ptxas_bin) and os.path.isfile(ptxas_bin):
++            print(f"ptxas_bin:{ptxas_bin}")
+             result = subprocess.check_output([ptxas_bin, "--version"], stderr=subprocess.STDOUT)
+             if result is not None:
++                print(f"result:{result}")
+                 version = re.search(r".*release (\d+\.\d+).*", result.decode("utf-8"), flags=re.MULTILINE)
+                 if version is not None:
++                    print(f"version:{version}")
+                     return ptxas, version.group(1)
+     raise RuntimeError("Cannot find ptxas")
