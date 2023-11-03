@@ -8,10 +8,9 @@ source:
   git_url: https://github.com/openai/triton.git
   git_rev: e6216047b8b0aef1fe8da6ca8667a3ad0a016411
   patches:
-    - patches/0001-do-not-package-third_party-folder.patch
     - patches/0003-properly-point-to-triton-includes.patch
     - patches/0004-Avoid-using-outdated-FindLLVM.patch
-    - patches/0005-Unvendor-third-party-libs.patch
+    - patches/0005-Unvendor-pybind-and-lit.patch
     - patches/0007-Fix-TableGen-issues.patch
     - patches/0008-Search-for-libs-in-CONDA_PREFIX-instead-of-third_par.patch
     - patches/0009-build-llvm-in-src-dir.patch
