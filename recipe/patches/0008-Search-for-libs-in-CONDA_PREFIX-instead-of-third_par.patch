@@ -74,20 +74,6 @@ Index: triton/python/triton/tools/build_extern.py
          header_str += "    else:\n"
          header_str += "        default = ''\n"
          header_str += "    return os.getenv(\"TRITON_LIBDEVICE_PATH\", default)\n"
-Index: triton/python/triton/common/backend.py
-===================================================================
---- triton.orig/python/triton/common/backend.py	2023-11-03 15:11:36.974785184 -0500
-+++ triton/python/triton/common/backend.py	2023-11-03 15:21:45.557436866 -0500
-@@ -105,7 +105,8 @@
-     base_dir = os.path.join(os.path.dirname(__file__), os.pardir)
-     paths = [
-         os.environ.get("TRITON_PTXAS_PATH", ""),
--        os.path.join(base_dir, "third_party", "cuda", "bin", "ptxas")
-+        os.path.join(os.environ["CONDA_PREFIX"], "bin", "ptxas"),
-+        # os.path.join(base_dir, "third_party", "cuda", "bin", "ptxas")
-     ]
-     print(f"paths:{paths}")
- 
 Index: triton/python/triton/common/build.py
 ===================================================================
 --- triton.orig/python/triton/common/build.py	2023-11-02 16:11:36.065026000 -0500
