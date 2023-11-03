@@ -13,8 +13,8 @@ Subject: [PATCH 8/8] Search for libs in CONDA_PREFIX instead of third_party
 
 Index: triton/lib/Target/LLVMIR/LLVMIRTranslation.cpp
 ===================================================================
---- triton.orig/lib/Target/LLVMIR/LLVMIRTranslation.cpp	2023-10-25 13:13:36.017681564 -0500
-+++ triton/lib/Target/LLVMIR/LLVMIRTranslation.cpp	2023-10-25 13:19:56.022624128 -0500
+--- triton.orig/lib/Target/LLVMIR/LLVMIRTranslation.cpp	2023-11-02 16:11:36.065152000 -0500
++++ triton/lib/Target/LLVMIR/LLVMIRTranslation.cpp	2023-11-03 15:21:45.556179664 -0500
 @@ -188,31 +188,20 @@
      // Then native code is in `triton/_C/libtriton.so` and libdevice in
      // `triton/third_party/cuda/lib/libdevice.10.bc`
@@ -61,8 +61,8 @@ Index: triton/lib/Target/LLVMIR/LLVMIRTranslation.cpp
  
 Index: triton/python/triton/tools/build_extern.py
 ===================================================================
---- triton.orig/python/triton/tools/build_extern.py	2023-10-25 13:13:36.020098844 -0500
-+++ triton/python/triton/tools/build_extern.py	2023-10-25 13:46:17.752162532 -0500
+--- triton.orig/python/triton/tools/build_extern.py	2023-11-02 16:11:36.064839000 -0500
++++ triton/python/triton/tools/build_extern.py	2023-11-03 15:21:45.556933327 -0500
 @@ -296,9 +296,8 @@
          header_str += "@functools.lru_cache()\n"
          header_str += "def libdevice_path():\n"
@@ -76,8 +76,8 @@ Index: triton/python/triton/tools/build_extern.py
          header_str += "    return os.getenv(\"TRITON_LIBDEVICE_PATH\", default)\n"
 Index: triton/python/triton/common/backend.py
 ===================================================================
---- triton.orig/python/triton/common/backend.py	2023-10-24 12:41:54.513797568 -0500
-+++ triton/python/triton/common/backend.py	2023-10-25 13:22:03.726438439 -0500
+--- triton.orig/python/triton/common/backend.py	2023-11-03 15:11:36.974785184 -0500
++++ triton/python/triton/common/backend.py	2023-11-03 15:21:45.557436866 -0500
 @@ -105,7 +105,8 @@
      base_dir = os.path.join(os.path.dirname(__file__), os.pardir)
      paths = [
@@ -86,12 +86,12 @@ Index: triton/python/triton/common/backend.py
 +        os.path.join(os.environ["CONDA_PREFIX"], "bin", "ptxas"),
 +        # os.path.join(base_dir, "third_party", "cuda", "bin", "ptxas")
      ]
+     print(f"paths:{paths}")
  
-     for ptxas in paths:
 Index: triton/python/triton/common/build.py
 ===================================================================
---- triton.orig/python/triton/common/build.py	2023-10-25 13:32:41.014410006 -0500
-+++ triton/python/triton/common/build.py	2023-10-25 13:33:05.732610953 -0500
+--- triton.orig/python/triton/common/build.py	2023-11-02 16:11:36.065026000 -0500
++++ triton/python/triton/common/build.py	2023-11-03 15:21:45.557800573 -0500
 @@ -48,9 +48,9 @@
  
  @functools.lru_cache()
@@ -107,8 +107,8 @@ Index: triton/python/triton/common/build.py
  def _build(name, src, srcdir):
 Index: triton/python/triton/language/math.py
 ===================================================================
---- triton.orig/python/triton/language/math.py	2023-10-24 12:41:54.517205563 -0500
-+++ triton/python/triton/language/math.py	2023-10-25 13:40:29.839500441 -0500
+--- triton.orig/python/triton/language/math.py	2023-11-02 16:11:36.064952000 -0500
++++ triton/python/triton/language/math.py	2023-11-03 15:21:45.558389737 -0500
 @@ -7,9 +7,9 @@
  @functools.lru_cache()
  def libdevice_path():
