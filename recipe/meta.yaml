@@ -67,6 +67,9 @@ test:
     - pip check
     # test suite essentially depends on availability of a physical GPU,
     # see https://github.com/openai/triton/issues/466;
+    # Note that the test suite makes heavy use of PyTorch, for which Triton is a
+    # dependency. So, you need to build Triton, then build PyTorch, then run these tests
+    # again.
     - pytest -v python/test
 
 about:
