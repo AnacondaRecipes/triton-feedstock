@@ -1,8 +1,12 @@
 llvmdev:
-  - 14
+  - 17
 llvm:
-  - 14
+  - 17
 mlir:
-  - 14
+  - 17
 libmlir:
-  - 14
+  - 17
+cuda_compiler_version:
+  - 12.3
+cuda_compiler:
+  - cuda-nvcc
