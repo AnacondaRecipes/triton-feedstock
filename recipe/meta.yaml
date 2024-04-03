@@ -1,6 +1,6 @@
 {% set version = "2.3.0" %}
 # Set to "None" for usual release builds
-{% set release_branch = release/2.3.x %}
+{% set release_branch = "release/2.3.x" %}
 
 package:
   name: triton
@@ -36,9 +36,10 @@ requirements:
     - {{ compiler('cuda') }}
     - make
     - cmake
+    - ninja
     - mlir
     - llvmdev
-    {% if rc %}
+    {% if release_branch %}
     - git
     {% endif %}
   host:
