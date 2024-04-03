@@ -10,8 +10,8 @@ Subject: [PATCH 5/8] Unvendor third party libs
 
 Index: triton/CMakeLists.txt
 ===================================================================
---- triton.orig/CMakeLists.txt	2024-04-02 12:32:20.905629496 -0500
-+++ triton/CMakeLists.txt	2024-04-02 12:38:56.281509679 -0500
+--- triton.orig/CMakeLists.txt	2024-04-03 15:56:14.605198364 -0500
++++ triton/CMakeLists.txt	2024-04-03 15:56:27.008038401 -0500
 @@ -42,7 +42,8 @@
  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
  
@@ -24,32 +24,18 @@ Index: triton/CMakeLists.txt
  
 Index: triton/python/setup.py
 ===================================================================
---- triton.orig/python/setup.py	2024-04-02 12:32:20.906752701 -0500
-+++ triton/python/setup.py	2024-04-02 12:40:15.374779126 -0500
-@@ -239,7 +239,7 @@
-             raise RuntimeError("Could not find user home directory")
-         triton_cache_path = os.path.join(user_home, ".triton")
-         # lit is used by the test suite
--        thirdparty_cmake_args = get_thirdparty_packages(triton_cache_path)
-+        # thirdparty_cmake_args = get_thirdparty_packages(triton_cache_path)
-         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.path)))
-         # create build directories
-         if not os.path.exists(self.build_temp):
-@@ -260,9 +260,10 @@
-             "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
-             "-DPYTHON_INCLUDE_DIRS=" + python_include_dir,
-         ]
--        if lit_dir is not None:
--            cmake_args.append("-DLLVM_EXTERNAL_LIT=" + lit_dir)
--        cmake_args.extend(thirdparty_cmake_args)
-+        # cmake_args.extend()
-+        # if lit_dir is not None:
-+        #     cmake_args.append("-DLLVM_EXTERNAL_LIT=" + lit_dir)
-+        # cmake_args.extend(thirdparty_cmake_args)
+--- triton.orig/python/setup.py	2024-04-03 15:56:06.463262234 -0500
++++ triton/python/setup.py	2024-04-03 16:01:38.524940670 -0500
+@@ -105,7 +105,7 @@
  
-         # configuration
-         cfg = get_build_type()
-@@ -319,27 +320,27 @@
+ 
+ def get_thirdparty_packages(triton_cache_path):
+-    packages = [get_pybind11_package_info(), get_llvm_package_info()]
++    packages = [get_llvm_package_info()]
+     thirdparty_cmake_args = []
+     for p in packages:
+         package_root_dir = os.path.join(triton_cache_path, p.package)
+@@ -319,27 +319,6 @@
          subprocess.check_call(["cmake", "--build", ".", "--target", "mlir-doc"], cwd=cmake_dir)
  
  
@@ -74,27 +60,6 @@ Index: triton/python/setup.py
 -    url_func=lambda arch, version:
 -    f"https://anaconda.org/nvidia/cuda-nvdisasm/12.3.52/download/linux-{arch}/cuda-nvdisasm-{version}-0.tar.bz2",
 -)
-+# download_and_copy(
-+#     src_path="bin/ptxas",
-+#     variable="TRITON_PTXAS_PATH",
-+#     version="12.3.52",
-+#     url_func=lambda arch, version:
-+#     f"https://anaconda.org/nvidia/cuda-nvcc/12.3.52/download/linux-{arch}/cuda-nvcc-{version}-0.tar.bz2",
-+# )
-+# download_and_copy(
-+#     src_path="bin/cuobjdump",
-+#     variable="TRITON_CUOBJDUMP_PATH",
-+#     version="12.3.52",
-+#     url_func=lambda arch, version:
-+#     f"https://anaconda.org/nvidia/cuda-cuobjdump/12.3.52/download/linux-{arch}/cuda-cuobjdump-{version}-0.tar.bz2",
-+# )
-+# download_and_copy(
-+#     src_path="bin/nvdisasm",
-+#     variable="TRITON_NVDISASM_PATH",
-+#     version="12.3.52",
-+#     url_func=lambda arch, version:
-+#     f"https://anaconda.org/nvidia/cuda-nvdisasm/12.3.52/download/linux-{arch}/cuda-nvdisasm-{version}-0.tar.bz2",
-+# )
  
  setup(
      name=os.environ.get("TRITON_WHEEL_NAME", "triton"),
