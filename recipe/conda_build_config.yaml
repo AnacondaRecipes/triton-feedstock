@@ -1,11 +1,3 @@
-llvmdev:
-  - 17
-llvm:
-  - 17
-mlir:
-  - 17
-libmlir:
-  - 17
 cuda_compiler_version:
   - 12.3
 cuda_compiler:
