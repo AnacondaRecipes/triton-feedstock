@@ -36,6 +36,7 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}
     - make
     - cmake
     - ninja
@@ -46,8 +47,6 @@ requirements:
   host:
     - python
     - pybind11
-    # for cuda.h
-    - cuda-cudart-dev
     - pip
     - zlib
   run:
