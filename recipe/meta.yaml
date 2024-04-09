@@ -52,6 +52,9 @@ requirements:
     - python
     - filelock
     - lit
+    - cuda-cuobjdump
+    - cuda-nvvm-tools
+    - cuda-nvcc-tools
 
 test:
   imports:
