@@ -40,7 +40,6 @@ requirements:
     - make
     - cmake
     - ninja
-    - ccache
     {% if release_branch %}
     - git
     {% endif %}
