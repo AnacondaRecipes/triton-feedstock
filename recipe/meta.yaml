@@ -30,8 +30,6 @@ build:
   # It's primarily for PyTorch, and they only use it for linux-64/GPU.
   skip: true  # [not (linux and x86_64)]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
-  ignore_run_exports:
-    - cuda-cudart
 
 requirements:
   build:
@@ -47,14 +45,18 @@ requirements:
     - python
     - pybind11
     - pip
-    - zlib
   run:
     - python
     - filelock
+    - numpy
     - lit
+    # provides cuobjdump and nvdisasm
     - cuda-cuobjdump
+    # provides libdevice
     - cuda-nvvm-tools
+    # provides ptxas
     - cuda-nvcc-tools
+    - zlib
 
 test:
   imports:
