@@ -10,9 +10,9 @@ Subject: [PATCH 5/8] Unvendor third party libs
 
 Index: triton/CMakeLists.txt
 ===================================================================
---- triton.orig/CMakeLists.txt	2024-04-03 15:56:14.605198364 -0500
-+++ triton/CMakeLists.txt	2024-04-03 15:56:27.008038401 -0500
-@@ -42,7 +42,8 @@
+--- triton.orig/CMakeLists.txt	2024-05-31 11:26:58.261671000 -0500
++++ triton/CMakeLists.txt	2024-05-31 11:37:42.682379042 -0500
+@@ -45,7 +45,8 @@
  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
  
  # Third-party
@@ -24,8 +24,8 @@ Index: triton/CMakeLists.txt
  
 Index: triton/python/setup.py
 ===================================================================
---- triton.orig/python/setup.py	2024-04-03 15:56:06.463262234 -0500
-+++ triton/python/setup.py	2024-04-03 16:01:38.524940670 -0500
+--- triton.orig/python/setup.py	2024-05-31 11:37:37.626430157 -0500
++++ triton/python/setup.py	2024-05-31 11:38:00.788446000 -0500
 @@ -105,7 +105,7 @@
  
  
@@ -65,8 +65,8 @@ Index: triton/python/setup.py
      name=os.environ.get("TRITON_WHEEL_NAME", "triton"),
 Index: triton/include/triton/Target/PTX/TmaMetadata.h
 ===================================================================
---- triton.orig/include/triton/Target/PTX/TmaMetadata.h	2024-04-03 15:54:16.680103504 -0500
-+++ triton/include/triton/Target/PTX/TmaMetadata.h	2024-04-03 17:12:04.154833294 -0500
+--- triton.orig/include/triton/Target/PTX/TmaMetadata.h	2024-05-31 11:26:58.261838000 -0500
++++ triton/include/triton/Target/PTX/TmaMetadata.h	2024-05-31 11:37:42.683789027 -0500
 @@ -24,7 +24,7 @@
  #ifndef TRITON_TARGET_PTX_TMAMETADATA_H
  #define TRITON_TARGET_PTX_TMAMETADATA_H
