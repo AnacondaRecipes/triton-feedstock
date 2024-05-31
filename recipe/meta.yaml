@@ -1,15 +1,25 @@
 {% set version = "2.3.0" %}
-# Set to "None" for usual release builds
-{% set release_branch = "release/2.3.x" %}
+# Triton don't pin their releases until some time after their pypi release. PyTorch build a package called "torchtriton"
+# using a commit in pytorch/.ci/docker/ci_commit_pins. Since we need triton solely as a required dependency for
+# pytorch's cuda variant at the moment, we'll do the same. NOTE that for v2.3.0, the commit in
+# pytorch/.ci/docker/ci_commit_pins actually isn't part of the repo tree any more, because the triton maintainers
+# force-pushed the release branch. The torch-commit-pin below is a commit on the release branch with the same comtent as
+# the commit in the pytorch file. Obviously, this is all far from ideal, and needs to be managed with some care.
+# Set torch-commit-pin to "None" for usual release builds
+{% set torch-commit-pin = "3f8d91bb17f6e7bc33dc995ae0860db89d351c7b" %}
 
 package:
+{% if torch-commit-pin != None %}
+  name: torchtriton
+{% else %}
   name: triton
+{% endif %}
   version: {{ version }}
 
 source:
-{% if release_branch != None %}
+{% if torch-commit-pin != None %}
   git_url: https://github.com/openai/triton.git
-  git_rev: {{ release_branch }}
+  git_rev: {{ torch-commit-pin }}
 {% else %}
   url: https://github.com/openai/triton/archive/refs/tags/v{{ version }}.tar.gz
 {% endif %}
@@ -24,7 +34,7 @@ source:
     - patches/0009-unpack-llvm-within-env.patch
 
 build:
-  number: 4
+  number: 0
   # Triton only currently supports linux, and is a GPU optimization tool.
   # We only have a linux-64 GPU builder at the moment.
   # It's primarily for PyTorch, and they only use it for linux-64/GPU.
