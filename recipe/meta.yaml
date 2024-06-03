@@ -3,13 +3,13 @@
 # using a commit in pytorch/.ci/docker/ci_commit_pins. Since we need triton solely as a required dependency for
 # pytorch's cuda variant at the moment, we'll do the same. NOTE that for v2.3.0, the commit in
 # pytorch/.ci/docker/ci_commit_pins actually isn't part of the repo tree any more, because the triton maintainers
-# force-pushed the release branch. The torch-commit-pin below is a commit on the release branch with the same comtent as
+# force-pushed the release branch. The torch_commit_pin below is a commit on the release branch with the same comtent as
 # the commit in the pytorch file. Obviously, this is all far from ideal, and needs to be managed with some care.
-# Set torch-commit-pin to "None" for usual release builds
-{% set torch-commit-pin = "3f8d91bb17f6e7bc33dc995ae0860db89d351c7b" %}
+# Set torch_commit_pin to "None" for usual release builds
+{% set torch_commit_pin = "3f8d91bb17f6e7bc33dc995ae0860db89d351c7b" %}
 
 package:
-{% if torch-commit-pin != None %}
+{% if torch_commit_pin != None %}
   name: torchtriton
 {% else %}
   name: triton
@@ -17,9 +17,9 @@ package:
   version: {{ version }}
 
 source:
-{% if torch-commit-pin != None %}
+{% if torch_commit_pin != None %}
   git_url: https://github.com/openai/triton.git
-  git_rev: {{ torch-commit-pin }}
+  git_rev: {{ torch_commit_pin }}
 {% else %}
   url: https://github.com/openai/triton/archive/refs/tags/v{{ version }}.tar.gz
 {% endif %}
@@ -48,7 +48,7 @@ requirements:
     - make
     - cmake
     - ninja
-    {% if release_branch %}
+    {% if torch_commit_pin %}
     - git
     {% endif %}
   host:
