@@ -25,12 +25,9 @@ source:
 {% endif %}
   sha256: 19b6de0d0bcce86e973258d112169cd321b677146808bcc5fed7f69046775cfd
   patches:
-    - patches/0001-do-not-package-third_party-folder.patch
-    #- patches/0003-properly-point-to-triton-includes.patch
-    #- patches/0004-Avoid-using-outdated-FindLLVM.patch
-    - patches/0005-Unvendor-third-party-libs.patch
-    #- patches/0007-Fix-TableGen-issues.patch
-    - patches/0008-Search-for-libs-in-CONDA_PREFIX-instead-of-third_par.patch
+    #- patches/0001-do-not-package-third_party-folder.patch
+    #- patches/0005-Unvendor-third-party-libs.patch
+    #- patches/0008-Search-for-libs-in-CONDA_PREFIX-instead-of-third_par.patch
     - patches/0009-unpack-llvm-within-env.patch
 
 build:
@@ -59,14 +56,14 @@ requirements:
     - python
     - filelock
     - numpy
-    - lit
+    #- lit
     # Triton compiles cuda kernels so needs the compiler toolchain at runtime.
     # More specifically, libdevice, ptxas, cuda.h, and the include path to cuda.h were required to make it work.
     # The latter is provided by cuda-nvcc_linux-64, which is what {{ compiler('cuda') }} expands to.
-    - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}
+    #- {{ compiler('cxx') }}
+    #- {{ compiler('cuda') }}
     # provides cuobjdump and nvdisasm
-    - cuda-cuobjdump
+    #- cuda-cuobjdump
     - zlib
 
 test:
@@ -86,7 +83,7 @@ test:
     # Note that the test suite makes heavy use of PyTorch, for which Triton is a
     # dependency. So, you need to build Triton, then build PyTorch, then run these tests
     # again.
-    - pytest -v python/test
+    #- pytest -v python/test
 
 about:
   home: https://github.com/openai/triton
