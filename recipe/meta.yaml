@@ -41,7 +41,7 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}
+    #- {{ compiler('cuda') }}
     - make
     - cmake
     - ninja
