@@ -36,7 +36,8 @@ build:
   # We only have a linux-64 GPU builder at the moment.
   # It's primarily for PyTorch, and they only use it for linux-64/GPU.
   skip: true  # [not (linux and x86_64)]
-  string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
+  #string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
+  string: cuda118py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:
   build:
