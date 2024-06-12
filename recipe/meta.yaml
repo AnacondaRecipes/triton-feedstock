@@ -61,7 +61,7 @@ requirements:
     # Triton compiles cuda kernels so needs the compiler toolchain at runtime.
     # More specifically, libdevice, ptxas, cuda.h, and the include path to cuda.h were required to make it work.
     # The latter is provided by cuda-nvcc_linux-64, which is what {{ compiler('cuda') }} expands to.
-    #- {{ compiler('cxx') }}
+    - {{ compiler('cxx') }}
     #- {{ compiler('cuda') }}
     # provides cuobjdump and nvdisasm
     #- cuda-cuobjdump
