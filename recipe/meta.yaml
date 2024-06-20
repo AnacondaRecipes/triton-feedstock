@@ -76,7 +76,7 @@ test:
     - pip
     - pytest
     - scipy
-    - pytorch {{ version }}
+    - pytorch={{ version }}=*cuda*
   source_files:
     - python/test
   commands:
