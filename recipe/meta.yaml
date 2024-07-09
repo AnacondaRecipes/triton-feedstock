@@ -73,7 +73,6 @@ requirements:
   run:
     - python
     - filelock
-    - numpy
     # Triton compiles cuda kernels so needs the compiler toolchain at runtime.
     #
     # {{ compiler('cuda') }} provides libdevice, ptxas, cuda.h, and the include path to cuda.h.
