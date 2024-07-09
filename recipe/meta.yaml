@@ -68,6 +68,8 @@ requirements:
     - python
     - pybind11
     - pip
+    - setuptools
+    - wheel
   run:
     - python
     - filelock
