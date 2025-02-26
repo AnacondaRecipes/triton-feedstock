@@ -40,17 +40,19 @@ build:
   # TODO: windows support should be available from next version;
   #       CPU-only support still under development
   skip: true  # [win or cuda_compiler_version == "None"]
+  # Skipping macos and other architectures for the moment
+  skip: true  # [osx or s390x or ppc64le or aarch64]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}
-    - {{ stdlib('c') }}
     - ninja
     - cmake
     - mlir
     - llvmdev
+    - patch
   host:
     - python
     - pybind11
