@@ -66,13 +66,14 @@ requirements:
   run:
     - python
     - filelock
-    - pytorch =*=cuda*
     - lit
     - cuda-nvcc
     - cuda-cuobjdump
     - cuda-cudart
     - cuda-cupti
 
+# Note that PyTorch is a test dependency here, and Triton is a dependency of (the CUDA variant of) PyTorch.
+# So, you need to build Triton without running the tests (`conda build --no-test`), then build PyTorch, then run these tests.
 test:
   imports:
     - triton
@@ -81,6 +82,7 @@ test:
     - pip
     - pytest
     - scipy
+    - pytorch=*=*cuda*
   source_files:
     - python/test
   commands:

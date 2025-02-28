@@ -7,5 +7,4 @@ build_parameters:
 
 upload_without_merge: True
 upload_to_staging_channel_in_pr: True
-upload_channels: [ cuda12_def ]
 channels: [ cuda12_def ]
