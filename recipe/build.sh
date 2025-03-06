@@ -24,4 +24,4 @@ export MAX_JOBS=$CPU_COUNT
 sed -i -e '/TRITON_BUILD_UT/s:\bON:OFF:' CMakeLists.txt
 
 cd python
-$PYTHON -m pip install . -vv
+$PYTHON -m pip install . -vv --no-deps --no-build-isolation
