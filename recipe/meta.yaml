@@ -1,92 +1,79 @@
-{% set version = "2.3.0" %}
-# Triton don't pin their releases (https://github.com/triton-lang/triton/issues/3535).
-# PyTorch build a package called "torchtriton" using a commit in pytorch/.ci/docker/ci_commit_pins. Since we need triton
-# solely as a required dependency for pytorch's cuda variant at the moment, we'll do the same. NOTE that for v2.3.0, the
-# commit in pytorch/.ci/docker/ci_commit_pins actually isn't part of the repo tree any more, because the triton
-# maintainers force-pushed the release branch. The torch_commit_pin below is a commit on the release branch with the
-# same comtent as the commit in the pytorch file. Obviously, this is all far from ideal, and needs to be managed with
-# some care. Set torch_commit_pin to "None" for usual release builds.
-{% set torch_commit_pin = "3f8d91bb17f6e7bc33dc995ae0860db89d351c7b" %}
+{% set version = "3.1.0" %}
+# Triton no longer tags releases, but there are release branches, e.g.
+# https://github.com/triton-lang/triton/commits/release/3.1.x/
+# Check if the commit id from Pytorch's latest pinned commit in
+# https://github.com/pytorch/pytorch/blob/v{{ pytorch_ver }}/.ci/docker/ci_commit_pins/triton.txt
+# can be found on one of those release branches, and use that as the version
+{% set git_commit = "5fe38ffd73c2ac6ed6323b554205186696631c6f" %}
 
 package:
-{% if torch_commit_pin != None %}
-  name: torchtriton
-{% else %}
   name: triton
-{% endif %}
   version: {{ version }}
 
 source:
-{% if torch_commit_pin != None %}
-  git_url: https://github.com/openai/triton.git
-  git_rev: {{ torch_commit_pin }}
-{% else %}
-  url: https://github.com/openai/triton/archive/refs/tags/v{{ version }}.tar.gz
-{% endif %}
-  sha256: 19b6de0d0bcce86e973258d112169cd321b677146808bcc5fed7f69046775cfd
+  url: https://github.com/openai/triton/archive/{{ git_commit }}.tar.gz
+  sha256: 933babc32b69872efbce05fe8be61129fecf52c724fadea42d8c7b2d10e16ad9
   patches:
-    # These patches are for unvendoring CUDA compiler tools.
-    # This isn't being done with v2.3.0 as PyTorch doesn't support CUDA v12.4 yet,
-    # and our CUDAtoolkit v11.8 doesn't have the compiler tools.
-    # Use these patches for PyTorch v2.4.0 and above.
-    #- patches/0001-do-not-package-third_party-folder.patch
-    #- patches/0005-Unvendor-third-party-libs.patch
-    #- patches/0008-Search-for-libs-in-CONDA_PREFIX-instead-of-third_par.patch
-    # These patches are for unvendoring LLVM.
-    # The version of LLVM used for triton v2.3.0 is an unpinned commit on LLVM project's
-    # main branch, so we can't use a conda package for this.
-    # These patches can be used to help unvendoring if this changes.
-    # - patches/0004-Avoid-using-outdated-FindLLVM.patch
-    # - patches/0007-Fix-TableGen-issues.patch
-    # This patch applies even when llvm is vendored-in.
-    - patches/0009-unpack-llvm-within-env.patch
+    - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
+    # https://github.com/triton-lang/triton/commit/e4569136f3821ad3d99bef43254bf935c1c96f42
+    - patches/0002-BACKEND-Update-LLVM-version-to-https-github.com-llvm.patch
+    # https://github.com/triton-lang/triton/commit/cd4a172c79c69fff91b893c2e5deb78a7a887c26
+    - patches/0003-BACKEND-Update-LLVM-version-to-https-github.com-llvm.patch
+    # https://github.com/triton-lang/triton/commit/3e233d7ccd62bc7a29eb5266c80b379cef1f6132
+    - patches/0004-BACKEND-Update-LLVM-to-llvm-llvm-project-657ec7320d8.patch
+    # https://github.com/triton-lang/triton/commit/e8873ae7dfe68eda04d7656ec93627afe8dc56a1
+    - patches/0005-BACKEND-Update-LLVM-version-to-https-github.com-llvm.patch
+    # https://github.com/triton-lang/triton/commit/46550ab18e8f7314107cf591b9cf902b290fd45d
+    - patches/0006-BACKEND-Update-LLVM-version-to-https-github.com-llvm.patch
+    # diff between main branch:
+    # https://github.com/triton-lang/triton/commit/cf2ad02324fc253970c3ab2666e775406405f213
+    # and 3.1.x branch:
+    # https://github.com/triton-lang/triton/commit/757b6a61e7df814ba806f498f8bb3160f84b120c
+    - patches/0007-Update-config.enableRegionSimplification-for-LLVM-19.patch
+    - patches/0008-Do-not-link-directly-to-LLVM-static-libraries.patch
+    # https://github.com/triton-lang/triton/commit/f48dbc1b106c93144c198fbf3c4f30b2aab9d242
+    - patches/0009-CODEGEN-Support-CUDA-12.6-4588.patch
+    - patches/0010-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
+    # backport https://github.com/triton-lang/triton/pull/5492
+    - patches/0011-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
 
 build:
-  number: 0
-  # Triton only currently supports linux, and is a GPU optimization tool.
-  # We only have a linux-64 GPU builder at the moment.
-  # It's primarily for PyTorch, and they only use it for linux-64/GPU.
+  number: 3 
+  # TODO: windows support should be available from next version;
+  #       CPU-only support still under development
+  skip: true  # [win or cuda_compiler_version == "None"]
+  # We only use this (and can test this) for pytorch, linux-64/GPU.
   skip: true  # [not (linux and x86_64)]
-  # the torch.compile feature in PyTorch isn't supported on python 3.12:
-  # https://github.com/pytorch/pytorch/blob/97ff6cfd9c86c5c09d7ce775ab64ec5c99230f5d/test/test_transformers.py#L3418
-  skip: true  # [py>=312]
-  # Put the cuda version variable back into the build string when we unvendor CUDA.
-  # For triton v2.3.0, CUDA v12.3 is vendored-in.
-  #string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
-  string: cuda123py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make
-    - cmake
+    - {{ compiler('cuda') }}
     - ninja
-    {% if torch_commit_pin %}
-    - git
-    {% endif %}
+    - cmake
+    - mlir
+    - llvmdev
+    - patch
   host:
     - python
     - pybind11
     - pip
     - setuptools
     - wheel
+    - llvm
+    - libmlir
+    - zlib
+    - nlohmann_json
+    - cuda-cupti-dev
   run:
     - python
     - filelock
-    # Triton compiles cuda kernels so needs the compiler toolchain at runtime.
-    #
-    # {{ compiler('cuda') }} provides libdevice, ptxas, cuda.h, and the include path to cuda.h.
-    # cuda-cuobjdump provides cuobjdump and nvdisasm.
-    # Currently we keep CUDAtookit vendored-in (see patches section for reasoning), but this should be un-commented
-    # when this changes.
-    #
-    #- {{ compiler('cuda') }}
-    #- cuda-cuobjdump
-    #
-    #  gcc is required whether the cuda tools are vendored-in or not, to support CUDA compilation. (nvcc is called via
-    #  gcc when it processes .cu files, which are c++ syntax extended by CUDA syntax).
-    - {{ compiler('cxx') }}
-    - zlib
+    - lit
+    - cuda-nvcc
+    - cuda-cuobjdump
+    - cuda-cudart
+    - cuda-cupti
 
 # Note that PyTorch is a test dependency here, and Triton is a dependency of (the CUDA variant of) PyTorch.
 # So, you need to build Triton without running the tests (`conda build --no-test`), then build PyTorch, then run these tests.
@@ -98,11 +85,16 @@ test:
     - pip
     - pytest
     - scipy
-    - pytorch={{ version }}=*cuda*
+    - pytorch=*=*cuda*
   source_files:
     - python/test
   commands:
     - pip check
+    # test suite essentially depends on availability of a physical GPU,
+    # see https://github.com/openai/triton/issues/466;
+    # run a test that does not require a GPU but checks
+    # if triton.compile() works
+    - pytest -v python/test/unit/tools/test_aot.py::test_ttgir_to_ptx
     # Here is a list of current test failures and reasoning why they're ok:
     #
     # test_dummy_backend                    - looks like it's using CUDA instead of CPU backend for this test, for some reason. We don't need to use the CPU backend anyway.
