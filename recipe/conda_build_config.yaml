@@ -1,11 +1,25 @@
 llvmdev:
-  - 19
+  - 20
 llvm:
-  - 19
+  - 20
 mlir:
-  - 19
+  - 20
 libmlir:
-  - 19
+  - 20
+
+cuda_compiler_version:
+  - 12.8
+
+#llvmdev:
+#  - 21.1
+#llvm:
+#  - 21.1
+#mlir:
+#  - 21.1
+#libmlir:
+#  - 21.1
+#zlib:
+#  - 1.3
 
 # # The package fails to build against CUDA 12.0, upstream uses 12.4.99,
 # # let's just use 12.6.
