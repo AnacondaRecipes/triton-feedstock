@@ -51,31 +51,18 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}
+    - {{ stdlib('c') }}
     - ninja
     - cmake
-    # CallOpInterface::resolveCallableInTable
-    #- mlir
-    #- llvmdev
-    - patch
-    - cuda-toolkit
-    - cuda-cudart
-    - cuda-cudart-dev
-    - cuda-driver-dev
   host:
     - python
     - pybind11
     - pip
     - setuptools
     - wheel
-    #- llvm
-    #- libmlir
     - zlib
     - nlohmann_json
     - cuda-cupti-dev
-    - cuda-toolkit
-    - cuda-cudart
-    - cuda-cudart-dev
-    - cuda-driver-dev
   run:
     - python
     - filelock

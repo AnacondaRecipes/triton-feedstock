@@ -3,7 +3,10 @@
 set -ex
 
 # remove outdated vendored headers
-#rm -rf $SRC_DIR/python/triton/third_party
+rm -rf $SRC_DIR/python/triton/third_party
+
+# disable downloading dependencies entirely
+#export TRITON_OFFLINE_BUILD=1
 
 export JSON_SYSPATH=$PREFIX
 #export LLVM_SYSPATH=$PREFIX
@@ -19,16 +22,40 @@ export TRITON_CUPTI_PATH=$PREFIX
 
 export MAX_JOBS=$CPU_COUNT
 
-echo "TRITON_CUDART_PATH files:"
-ls $TRITON_CUDART_PATH
+rm -rf /root/.triton/
+rm -rf ~/.triton/
+rm -rf /tmp/triton*
+rm -rf build/
+rm -rf dist/
+rm -rf *.egg-info/
 
-echo "=================="
-echo "cuda.h contents:"
-echo "=================="
-cat $TRITON_CUDART_PATH/cuda.h > ~/anc/cuda_h_cat.txt
-echo "=================="
-echo "end of cuda.h:"
-echo "=================="
+export TRITON_BUILD_WITH_CLANG_LLD=false
+export TRITON_BUILD_WITH_CCACHE=false
+#export LLVM_BUILD_FROM_SOURCE=0
+#export TRITON_LLVM_BUILD_FROM_SOURCE=0
+export CC="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-gcc"
+export CXX="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-g++"
+
+# Create a stub for the missing __glibcxx_assert_fail function
+cat > /tmp/glibcxx_assert_stub.cpp << 'EOF'
+#include <cstdio>
+#include <cstdlib>
+
+namespace std {
+  [[noreturn]] void __glibcxx_assert_fail(const char* file, int line,
+                                          const char* function, const char* condition) {
+    fprintf(stderr, "Assertion failed: %s at %s:%d in %s\n", condition, file, line, function);
+    abort();
+  }
+}
+EOF
+
+# Compile the stub into an object file
+$CXX -c /tmp/glibcxx_assert_stub.cpp -o /tmp/glibcxx_assert_stub.o -fPIC
+
+export CXXFLAGS="-D_GLIBCXX_ASSERTIONS $CXXFLAGS"
+export CPPFLAGS="-I$BUILD_PREFIX/include $CPPFLAGS"
+export LDFLAGS="/tmp/glibcxx_assert_stub.o -L$BUILD_PREFIX/lib -Wl,-rpath,$BUILD_PREFIX/lib $LDFLAGS"
 
 #export MLIR_DIR=$PREFIX/lib/cmake/mlir
 
