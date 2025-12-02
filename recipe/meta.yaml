@@ -104,7 +104,9 @@ test:
     #
     # the test_performance tests are broken for compute capability 7.x, which applies to our current build instances.
     # test_device_backend is also broken, attempting to import from triton.common which was removed.
-    - pytest -v python/test --ignore=python/test/regression/test_performance.py --ignore=python/test/backend/test_device_backend.py || true
+    # Skipping python/test/unit tests due to configuration conflict with duplicate --device parameter (there's probably a different
+    # way around this, but for now skipping is sufficient to reach the more interesting tests).
+    - pytest -v python/test --ignore=python/test/regression/test_performance.py --ignore=python/test/backend/test_device_backend.py --ignore=python/test/unit || true
 
 about:
   home: https://github.com/openai/triton
