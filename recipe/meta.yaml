@@ -103,7 +103,8 @@ test:
     # In general, the more important tests are the PyTorch tests. This package only supports PyTorch. See text at the top of the recipe.
     #
     # the test_performance tests are broken for compute capability 7.x, which applies to our current build instances.
-    - pytest -v python/test --ignore=python/test/regression/test_performance.py || true
+    # test_device_backend is also broken, attempting to import from triton.common which was removed.
+    - pytest -v python/test --ignore=python/test/regression/test_performance.py --ignore=python/test/backend/test_device_backend.py || true
 
 about:
   home: https://github.com/openai/triton
