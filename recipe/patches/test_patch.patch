@@ -52,17 +52,18 @@ index 065b170aa..ac32a5b6d 100644
          cfg = get_build_type()
          build_args = ["--config", cfg]
 diff --git a/python/triton/runtime/build.py b/python/triton/runtime/build.py
-index 1b76548d4..6802a9b97 100644
+index 1b76548d4..e59c9c303 100644
 --- a/python/triton/runtime/build.py
 +++ b/python/triton/runtime/build.py
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,7 @@
++import sys
  import sysconfig
  import os
 +import platform
  import shutil
  import subprocess
  
-@@ -28,6 +29,28 @@ def _build(name, src, srcdir, library_dirs, include_dirs, libraries):
+@@ -28,6 +30,28 @@ def _build(name, src, srcdir, library_dirs, include_dirs, libraries):
      py_include_dir = sysconfig.get_paths(scheme=scheme)["include"]
      custom_backend_dirs = set(os.getenv(var) for var in ('TRITON_CUDACRT_PATH', 'TRITON_CUDART_PATH'))
      include_dirs = include_dirs + [srcdir, py_include_dir, *custom_backend_dirs]
