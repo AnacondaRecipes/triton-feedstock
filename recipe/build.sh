@@ -19,10 +19,10 @@ export TRITON_NVDISASM_PATH=$PREFIX/bin/nvdisasm
 export TRITON_CUDACRT_PATH=$PREFIX
 export TRITON_CUDART_PATH=$PREFIX/targets/x86_64-linux/include
 export TRITON_CUPTI_PATH=$PREFIX
-
+export TRITON_CACHE_DIR=/tmp/.triton
 export MAX_JOBS=$CPU_COUNT
 
-rm -rf /root/.triton/
+rm -rf /tmp/.triton/
 rm -rf ~/.triton/
 rm -rf /tmp/triton*
 rm -rf build/
