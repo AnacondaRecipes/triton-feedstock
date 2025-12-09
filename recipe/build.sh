@@ -5,11 +5,7 @@ set -ex
 # remove outdated vendored headers
 rm -rf $SRC_DIR/python/triton/third_party
 
-# disable downloading dependencies entirely
-#export TRITON_OFFLINE_BUILD=1
-
 export JSON_SYSPATH=$PREFIX
-#export LLVM_SYSPATH=$PREFIX
 export PYBIND11_SYSPATH=$SP_DIR/pybind11
 
 # these don't seem to be actually used, but they prevent downloads
@@ -31,12 +27,10 @@ rm -rf *.egg-info/
 
 export TRITON_BUILD_WITH_CLANG_LLD=false
 export TRITON_BUILD_WITH_CCACHE=false
-#export LLVM_BUILD_FROM_SOURCE=0
-#export TRITON_LLVM_BUILD_FROM_SOURCE=0
 export CC="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-gcc"
 export CXX="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-g++"
 
-# Create a stub for the missing __glibcxx_assert_fail function
+# GCC version missing __glibcxx_assert_fail function. We'll create a stub for it.
 cat > /tmp/glibcxx_assert_stub.cpp << 'EOF'
 #include <cstdio>
 #include <cstdlib>
@@ -56,8 +50,6 @@ $CXX -c /tmp/glibcxx_assert_stub.cpp -o /tmp/glibcxx_assert_stub.o -fPIC
 export CXXFLAGS="-D_GLIBCXX_ASSERTIONS $CXXFLAGS"
 export CPPFLAGS="-I$BUILD_PREFIX/include $CPPFLAGS"
 export LDFLAGS="/tmp/glibcxx_assert_stub.o -L$BUILD_PREFIX/lib -Wl,-rpath,$BUILD_PREFIX/lib $LDFLAGS"
-
-#export MLIR_DIR=$PREFIX/lib/cmake/mlir
 
 # the build does not run C++ unittests, and they implicitly fetch gtest
 # no easy way of passing this, not really worth a whole patch
