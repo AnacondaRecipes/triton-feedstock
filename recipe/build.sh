@@ -18,6 +18,7 @@ export TRITON_CUPTI_PATH=$PREFIX
 export TRITON_CACHE_DIR=/tmp/.triton
 export MAX_JOBS=$CPU_COUNT
 
+# Cleanup caches, helpful to avoid previous build leftovers during development.
 rm -rf /tmp/.triton/
 rm -rf ~/.triton/
 rm -rf /tmp/triton*
