@@ -25,11 +25,6 @@ rm -rf build/
 rm -rf dist/
 rm -rf *.egg-info/
 
-export TRITON_BUILD_WITH_CLANG_LLD=false
-export TRITON_BUILD_WITH_CCACHE=false
-export CC="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-gcc"
-export CXX="$BUILD_PREFIX/bin/x86_64-conda-linux-gnu-g++"
-
 # GCC version missing __glibcxx_assert_fail function. We'll create a stub for it.
 cat > /tmp/glibcxx_assert_stub.cpp << 'EOF'
 #include <cstdio>
