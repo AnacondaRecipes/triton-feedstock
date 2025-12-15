@@ -1,7 +1,7 @@
-From df667c1f6e06e6562237710a28ea167531672786 Mon Sep 17 00:00:00 2001
-From: TS-ANC <208963744+TS-ANC@users.noreply.github.com>
-Date: Tue, 9 Dec 2025 15:19:50 +0100
-Subject: [PATCH 1/5] Remove -Werror that cause false-positive build failures
+From 5b674864b9f71718c5f569005198c02cb513fc09 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Micha=C5=82=20G=C3=B3rny?= <mgorny@gentoo.org>
+Date: Wed, 20 Nov 2024 17:17:18 +0100
+Subject: [PATCH 1/4] Remove -Werror that cause false-positive build failures
 
 ---
  CMakeLists.txt | 2 +-
@@ -20,6 +20,3 @@ index de6ed2393..d8cadd8bf 100644
  else()
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4624 /wd4715 /wd4530")
  endif()
--- 
-2.39.5 (Apple Git-154)
-

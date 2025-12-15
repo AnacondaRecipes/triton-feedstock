@@ -15,10 +15,9 @@ source:
   sha256: f526812ca60b9d11a0660e961bb901e098362fc3b1bc6de5ef7966406ca45ce9
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
-    - patches/0002-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
-    - patches/0003-Enable-libcxx-assertions.patch
-    - patches/0004-Enable-usage-of-MLIR-tblgen.patch
-    - patches/0005-Enable-PATH-fallback-for-finding-CUDA-tools.patch
+    - patches/0002-Do-not-link-directly-to-LLVM-static-libraries.patch
+    - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
+    - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
 
 build:
   number: 0
