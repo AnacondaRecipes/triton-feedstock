@@ -1,7 +1,7 @@
 From 90f2db11d694cd158fa4418ff60d2688c023e025 Mon Sep 17 00:00:00 2001
 From: TS-ANC <208963744+TS-ANC@users.noreply.github.com>
 Date: Tue, 9 Dec 2025 16:03:57 +0100
-Subject: [PATCH 5/5] Enable PATH fallback for finding CUDA tools
+Subject: Enable PATH fallback for finding CUDA tools
 
 ---
  third_party/nvidia/backend/compiler.py | 2 ++
