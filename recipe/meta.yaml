@@ -33,7 +33,7 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}
     - {{ stdlib('c') }}
-    - ninja
+    - ninja-base
     - cmake
   host:
     - python
