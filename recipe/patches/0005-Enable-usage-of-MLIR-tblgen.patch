@@ -1,0 +1,51 @@
+From 3b60f10b50a1dd7aee93f83e61c00cb72a5db5bf Mon Sep 17 00:00:00 2001
+From: TS-ANC <208963744+TS-ANC@users.noreply.github.com>
+Date: Tue, 9 Dec 2025 16:01:27 +0100
+Subject: Enable usage of MLIR-tblgen
+
+Currently unused as for MLIR vendoring. Kept for future.
+---
+ CMakeLists.txt  | 11 +++++++++++
+ python/setup.py |  4 ++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9f9940d58..0a63e52ef 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -151,6 +151,17 @@ else()
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4624 /wd4715 /wd4530")
+ endif()
+ 
++# use system mlir-tblgen if provided
++if(DEFINED ENV{MLIR_TBLGEN_EXE})
++  set(MLIR_TABLEGEN_EXE $ENV{MLIR_TBLGEN_EXE})
++  message(STATUS "Using system MLIR tablegen: ${MLIR_TABLEGEN_EXE}")
++endif()
++
++if(DEFINED MLIR_TBLGEN_EXE)
++  set(MLIR_TABLEGEN_EXE ${MLIR_TBLGEN_EXE})
++  message(STATUS "Using system MLIR tablegen: ${MLIR_TABLEGEN_EXE}")
++endif()
++
+ include_directories(".")
+ include_directories(${MLIR_INCLUDE_DIRS})
+ include_directories(${LLVM_INCLUDE_DIRS})
+diff --git a/python/setup.py b/python/setup.py
+index 065b170aa..ac32a5b6d 100644
+--- a/python/setup.py
++++ b/python/setup.py
+@@ -451,6 +451,10 @@ class CMakeBuild(build_ext):
+             cmake_args.append("-DLLVM_EXTERNAL_LIT=" + lit_dir)
+         cmake_args.extend(thirdparty_cmake_args)
+ 
++        # use system mlir-tblgen
++        cmake_args.append(f"-DMLIR_TBLGEN_EXE={os.environ.get('MLIR_TBLGEN_EXE', 'mlir-tblgen')}")
++        cmake_args.append(f"-DMLIR_TABLEGEN_EXE={os.environ.get('MLIR_TABLEGEN_EXE', 'mlir-tblgen')}")
++
+         # configuration
+         cfg = get_build_type()
+         build_args = ["--config", cfg]
+-- 
+2.39.5 (Apple Git-154)
+
