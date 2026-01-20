@@ -11,7 +11,7 @@ source:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
     - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
-    - patches/0005-Enable-usage-of-MLIR-tblgen.patch
+    # - patches/0005-Enable-usage-of-MLIR-tblgen.patch
     - patches/0006-fixes-definition-of-PY_SSIZE_T_CLEAN-macro.patch
 
 build:
