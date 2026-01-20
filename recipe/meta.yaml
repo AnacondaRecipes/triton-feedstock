@@ -1,10 +1,4 @@
-{% set version = "3.3.0" %}
-# Triton no longer tags releases, but there are release branches, e.g.
-# https://github.com/triton-lang/triton/commits/release/3.1.x/
-# Check if the commit id from Pytorch's latest pinned commit in
-# https://github.com/pytorch/pytorch/blob/v{{ pytorch_ver }}/.ci/docker/ci_commit_pins/triton.txt
-# can be found on one of those release branches, and use that as the version
-{% set git_commit = "5fe38ffd73c2ac6ed6323b554205186696631c6f" %}
+{% set version = "3.4.0" %}
 
 package:
   name: triton
@@ -12,12 +6,12 @@ package:
 
 source:
   url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: f526812ca60b9d11a0660e961bb901e098362fc3b1bc6de5ef7966406ca45ce9
+  sha256: a96e87a911794c907fab30e0c7a3f96ef4e9e8fdc8812cd8bbc6f0457619072f
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
     - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
-    - patches/0005-Enable-usage-of-MLIR-tblgen.patch
+    # - patches/0005-Enable-usage-of-MLIR-tblgen.patch
     - patches/0006-fixes-definition-of-PY_SSIZE_T_CLEAN-macro.patch
 
 build:

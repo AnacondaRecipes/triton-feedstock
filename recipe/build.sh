@@ -51,5 +51,4 @@ export LDFLAGS="/tmp/glibcxx_assert_stub.o -L$BUILD_PREFIX/lib -Wl,-rpath,$BUILD
 # no easy way of passing this, not really worth a whole patch
 sed -i -e '/TRITON_BUILD_UT/s:\bON:OFF:' CMakeLists.txt
 
-cd python
 $PYTHON -m pip install . -vv --no-deps --no-build-isolation
