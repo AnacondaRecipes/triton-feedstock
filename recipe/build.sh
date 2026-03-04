@@ -5,17 +5,21 @@ set -ex
 # remove outdated vendored headers
 rm -rf $SRC_DIR/python/triton/third_party
 
+# disable downloading dependencies entirely
+export TRITON_OFFLINE_BUILD=1
+
 export JSON_SYSPATH=$PREFIX
 export PYBIND11_SYSPATH=$SP_DIR/pybind11
 
-# these don't seem to be actually used, but they prevent downloads
+# only some of them are actually used currently, but set all just in case
 export TRITON_PTXAS_PATH=$PREFIX/bin/ptxas
 export TRITON_CUOBJDUMP_PATH=$PREFIX/bin/cuobjdump
 export TRITON_NVDISASM_PATH=$PREFIX/bin/nvdisasm
 export TRITON_CUDACRT_PATH=$PREFIX
-export TRITON_CUDART_PATH=$PREFIX/targets/x86_64-linux/include
-export TRITON_CUPTI_PATH=$PREFIX
-export TRITON_CACHE_DIR=/tmp/.triton
+export TRITON_CUDART_PATH=$PREFIX
+export TRITON_CUPTI_INCLUDE_PATH=$PREFIX/include
+export TRITON_CUPTI_LIB_PATH=$PREFIX/lib
+
 export MAX_JOBS=$CPU_COUNT
 
 # Cleanup caches, helpful to avoid previous build leftovers during development.

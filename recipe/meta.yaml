@@ -1,20 +1,21 @@
-{% set version = "3.4.0" %}
+{% set version = "3.5.1" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-  url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: a96e87a911794c907fab30e0c7a3f96ef4e9e8fdc8812cd8bbc6f0457619072f
+  url: https://github.com/triton-lang/triton/releases/download/v{{ version }}/triton-{{ version }}.tar.gz
+  sha256: 4afb7e2af6ab4585ea923eb5054ea1748989d3a4b5b2e035d239723924c8a7fa
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
     - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
     - patches/0006-fixes-definition-of-PY_SSIZE_T_CLEAN-macro.patch
+    - patches/0007-PROTON-Conditionally-include-Proton-tests-8237.patch
 
 build:
-  number: 1
+  number: 0
   # TODO: windows support should be available from next version;
   #       CPU-only support still under development
   skip: true  # [win or cuda_compiler_version == "None"]
@@ -34,15 +35,14 @@ requirements:
     - pybind11
     - pip
     - setuptools
-    - wheel
     - zlib
     - nlohmann_json
     - cuda-cupti-dev
+    - cuda-version {{ cuda_compiler_version }}.*
   run:
     - python
-    - filelock
-    - lit
-    - cuda-nvcc
+    - setuptools
+    - cuda-nvcc-tools
     - cuda-cuobjdump
     - cuda-cudart
     - cuda-cupti
@@ -63,10 +63,10 @@ test:
   commands:
     - pip check
     # test suite essentially depends on availability of a physical GPU,
-    # see https://github.com/openai/triton/issues/466;
+    # see https://github.com/triton-lang/triton/issues/466;
     # run a test that does not require a GPU but checks
     # if triton.compile() works
-    - pytest -v python/test/unit/tools/test_aot.py::test_ttgir_to_ptx
+    - TRITON_INTERPRET=1 pytest -v python/test/unit/tools/test_aot.py::test_ttgir_to_asm
     # Here is a list of current test failures and reasoning why they're ok:
     #
     # test_dummy_backend                    - looks like it's using CUDA instead of CPU backend for this test, for some reason. We don't need to use the CPU backend anyway.
@@ -84,7 +84,7 @@ test:
     - pytest -v python/test --ignore=python/test/regression/test_performance.py --ignore=python/test/backend/test_device_backend.py --ignore=python/test/unit || true
 
 about:
-  home: https://github.com/openai/triton
+  home: https://github.com/triton-lang/triton
   license: MIT
   license_family: MIT
   license_file: LICENSE
@@ -93,7 +93,7 @@ about:
     This is the development repository of Triton, a language and compiler for writing highly efficient custom Deep-Learning primitives.
     The aim of Triton is to provide an open-source environment to write fast code at higher productivity than CUDA, but also with higher flexibility than other existing DSLs.
   doc_url: https://triton-lang.org/
-  dev_url: https://github.com/openai/triton
+  dev_url: https://github.com/triton-lang/triton
 
 extra:
   recipe-maintainers:
