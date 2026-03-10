@@ -9,3 +9,4 @@ libmlir:
 
 cuda_compiler_version:
   - 12.8
+  - 13.0
