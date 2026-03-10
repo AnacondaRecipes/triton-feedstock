@@ -5,9 +5,6 @@ set -ex
 # remove outdated vendored headers
 rm -rf $SRC_DIR/python/triton/third_party
 
-# disable downloading dependencies entirely
-export TRITON_OFFLINE_BUILD=1
-
 export JSON_SYSPATH=$PREFIX
 export PYBIND11_SYSPATH=$SP_DIR/pybind11
 

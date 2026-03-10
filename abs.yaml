@@ -6,4 +6,4 @@ build_parameters:
   - "--no-test"
 
 build_env_vars:
-  ANACONDA_ROCKET_ENABLE_PY313 : yes
+  ANACONDA_ROCKET_ENABLE_PY314 : yes
