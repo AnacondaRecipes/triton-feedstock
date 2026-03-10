@@ -41,6 +41,7 @@ requirements:
     - cuda-version {{ cuda_compiler_version }}
   run:
     - python
+    - setuptools
     - cuda-nvcc-tools
     - cuda-cuobjdump
     - cuda-cudart
