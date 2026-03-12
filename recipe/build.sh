@@ -8,26 +8,27 @@ rm -rf $SRC_DIR/python/triton/third_party
 export JSON_SYSPATH=$PREFIX
 export PYBIND11_SYSPATH=$SP_DIR/pybind11
 
-# these don't seem to be actually used, but they prevent downloads
+# only some of them are actually used currently, but set all just in case
 export TRITON_PTXAS_PATH=$PREFIX/bin/ptxas
 export TRITON_CUOBJDUMP_PATH=$PREFIX/bin/cuobjdump
 export TRITON_NVDISASM_PATH=$PREFIX/bin/nvdisasm
 export TRITON_CUDACRT_PATH=$PREFIX
-export TRITON_CUDART_PATH=$PREFIX/targets/x86_64-linux/include
-export TRITON_CUPTI_PATH=$PREFIX
-export TRITON_CACHE_DIR=/tmp/.triton
+export TRITON_CUDART_PATH=$PREFIX
+export TRITON_CUPTI_INCLUDE_PATH=$PREFIX/include
+export TRITON_CUPTI_LIB_PATH=$PREFIX/lib
+
 export MAX_JOBS=$CPU_COUNT
 
 # Cleanup caches, helpful to avoid previous build leftovers during development.
-rm -rf /tmp/.triton/
-rm -rf ~/.triton/
-rm -rf /tmp/triton*
+rm -rf /tmp/.triton/ || true
+rm -rf ~/.triton/ || true
+rm -rf /tmp/triton* || true
 rm -rf build/
 rm -rf dist/
 rm -rf *.egg-info/
 
 # GCC version missing __glibcxx_assert_fail function. We'll create a stub for it.
-cat > /tmp/glibcxx_assert_stub.cpp << 'EOF'
+cat > $SRC_DIR/glibcxx_assert_stub.cpp << 'EOF'
 #include <cstdio>
 #include <cstdlib>
 
@@ -41,11 +42,11 @@ namespace std {
 EOF
 
 # Compile the stub into an object file
-$CXX -c /tmp/glibcxx_assert_stub.cpp -o /tmp/glibcxx_assert_stub.o -fPIC
+$CXX -c $SRC_DIR/glibcxx_assert_stub.cpp -o $SRC_DIR/glibcxx_assert_stub.o -fPIC
 
 export CXXFLAGS="-D_GLIBCXX_ASSERTIONS $CXXFLAGS"
 export CPPFLAGS="-I$BUILD_PREFIX/include $CPPFLAGS"
-export LDFLAGS="/tmp/glibcxx_assert_stub.o -L$BUILD_PREFIX/lib -Wl,-rpath,$BUILD_PREFIX/lib $LDFLAGS"
+export LDFLAGS="$SRC_DIR/glibcxx_assert_stub.o -L$BUILD_PREFIX/lib -Wl,-rpath,$BUILD_PREFIX/lib $LDFLAGS"
 
 # the build does not run C++ unittests, and they implicitly fetch gtest
 # no easy way of passing this, not really worth a whole patch
