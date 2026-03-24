@@ -7,6 +7,9 @@ mlir:
 libmlir:
   - 20
 
+c_stdlib_version: # [linux and aarch64]
+  - 2.34          # [linux and aarch64]
+  
 cuda_compiler_version:
   - 12.8
   - 13.0
