@@ -17,8 +17,9 @@ build:
   # TODO: windows support should be available from next version;
   #       CPU-only support still under development
   skip: true  # [win or cuda_compiler_version == "None"]
-  # We only use this (and can test this) for pytorch, linux + GPU.
-  skip: true  # [not linux]
+  # We only use this (and can test this) for pytorch, linux + x86_64 + GPU.
+  # TODO: Await support on CI for aarch64 when 2.34 (Rocky Linux 9) are availible to use upon release.
+  skip: true  # [not (linux and x86_64)]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:

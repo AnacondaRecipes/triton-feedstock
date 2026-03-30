@@ -7,8 +7,11 @@ mlir:
 libmlir:
   - 20
 
-c_stdlib_version: # [linux and aarch64]
-  - 2.34          # [linux and aarch64]
+# Higher version needed for aarch64
+# This is not currently supported on our CI machines
+# Await support for this before building for aarch64
+# c_stdlib_version: # [linux and aarch64]
+#   - 2.34          # [linux and aarch64]
   
 cuda_compiler_version:
   - 12.8
