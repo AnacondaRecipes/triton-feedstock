@@ -1,4 +1,4 @@
-{% set version = "3.5.1" %}
+{% set version = "3.6.0" %}
 
 package:
   name: triton
@@ -6,20 +6,19 @@ package:
 
 source:
   url: https://github.com/triton-lang/triton/releases/download/v{{ version }}/triton-{{ version }}.tar.gz
-  sha256: 4afb7e2af6ab4585ea923eb5054ea1748989d3a4b5b2e035d239723924c8a7fa
+  sha256: 2251e067e4229e4a379259292e284232369977cb3ba1fb2424457df80115ec0a
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
     - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
-    - patches/0006-fixes-definition-of-PY_SSIZE_T_CLEAN-macro.patch
-    - patches/0007-PROTON-Conditionally-include-Proton-tests-8237.patch
 
 build:
   number: 0
   # TODO: windows support should be available from next version;
   #       CPU-only support still under development
   skip: true  # [win or cuda_compiler_version == "None"]
-  # We only use this (and can test this) for pytorch, linux-64/GPU.
+  # We only use this (and can test this) for pytorch, linux + x86_64 + GPU.
+  # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) are availible to use upon release.
   skip: true  # [not (linux and x86_64)]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
