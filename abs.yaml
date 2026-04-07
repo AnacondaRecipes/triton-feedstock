@@ -4,5 +4,5 @@ build_parameters:
   - "--skip-existing"
   - "--error-overlinking"
 
-  channels:
-    - jrobertson
+channels:
+  - jrobertson
