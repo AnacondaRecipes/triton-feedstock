@@ -55,6 +55,7 @@ test:
   requires:
     - pip
     - pytest
+    - expecttest
     - scipy
     - pytorch=*=*cuda*
     # triton._internal_testing runs supports_tma()/is_cuda() at import time, which JIT-builds
