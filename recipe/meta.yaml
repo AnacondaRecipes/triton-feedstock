@@ -41,7 +41,8 @@ requirements:
     - cmake
   host:
     - python
-    - pybind11
+    # upstream pyproject.toml requires pybind11>=2.13.1
+    - pybind11 >=2.13.1
     - pip
     - setuptools
     - zlib
@@ -65,8 +66,14 @@ test:
   requires:
     - pip
     - pytest
+    - expecttest
     - scipy
     - pytorch=*=*cuda*
+    # triton._internal_testing runs supports_tma()/is_cuda() at import time, which JIT-builds
+    # backends/nvidia cuda_utils.c and needs CUDA headers (cuda.h), not just the runtime.
+    - {{ compiler('cuda') }}
+    - cuda-nvcc ={{ cuda_compiler_version }}
+    - cuda-nvrtc-dev
   source_files:
     - python/test
   commands:
