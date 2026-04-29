@@ -1,12 +1,22 @@
-{% set version = "3.6.0" %}
+{% set version = "3.7.0" %}
+# Pre-release commit pin: triton-lang has not yet tagged v3.7.0. PyTorch v2.12.0
+# pins this exact commit on the release/3.7.x branch (see
+# https://github.com/pytorch/pytorch/blame/v2.12.0-rc3/.ci/docker/ci_commit_pins/triton.txt).
+# When triton tags v3.7.0, set commit = None to switch back to the release URL.
+{% set commit = "b4e20bbe55617cc798b986c2555a2bc7b303c737" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
+{% if commit %}
+  url: https://github.com/triton-lang/triton/archive/{{ commit }}.tar.gz
+  sha256: b74a442298bcc83f21d8f25671383bb6966af887413db306ee1105631e6a3892
+{% else %}
   url: https://github.com/triton-lang/triton/releases/download/v{{ version }}/triton-{{ version }}.tar.gz
-  sha256: 2251e067e4229e4a379259292e284232369977cb3ba1fb2424457df80115ec0a
+  sha256: TBD-at-release
+{% endif %}
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
