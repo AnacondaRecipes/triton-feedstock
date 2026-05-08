@@ -1,20 +1,12 @@
 {% set version = "3.7.0" %}
-# Set to a commit SHA to build from a pre-release commit on release/3.7.x;
-# leave None to use the official tagged release tarball.
-{% set commit = None %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-{% if commit %}
-  url: https://github.com/triton-lang/triton/archive/{{ commit }}.tar.gz
-  sha256: b74a442298bcc83f21d8f25671383bb6966af887413db306ee1105631e6a3892
-{% else %}
   url: https://github.com/triton-lang/triton/releases/download/v{{ version }}/triton-{{ version }}.tar.gz
   sha256: 101091a0b0a5e7c9b8ad8fec1f3f0274023299a527e3d26d9bd9551a3a82bbb4
-{% endif %}
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
