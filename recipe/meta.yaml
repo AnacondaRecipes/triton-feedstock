@@ -1,12 +1,17 @@
-{% set version = "3.6.0" %}
+{% set version = "3.7.0" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-  url: https://github.com/triton-lang/triton/releases/download/v{{ version }}/triton-{{ version }}.tar.gz
-  sha256: 2251e067e4229e4a379259292e284232369977cb3ba1fb2424457df80115ec0a
+  # Use the GitHub auto-archive instead of the official release tarball:
+  # triton-3.7.0.tar.gz (releases/download/...) is missing examples/plugins/,
+  # which CMakeLists.txt:342 references (add_subdirectory). The auto-archive
+  # contains the full repo tree. Triton has no real git submodules (backends
+  # nvidia/amd/proton are in-tree), so auto-archive works as the source.
+  url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: ff5cdcdd1b3f30a5db06c4e690ac73b16342c8181820e2cdf74e8514065ea7b8
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
@@ -31,7 +36,8 @@ requirements:
     - cmake
   host:
     - python
-    - pybind11
+    # upstream pyproject.toml requires pybind11>=2.13.1
+    - pybind11 >=2.13.1
     - pip
     - setuptools
     - zlib
@@ -55,8 +61,14 @@ test:
   requires:
     - pip
     - pytest
+    - expecttest
     - scipy
     - pytorch=*=*cuda*
+    # triton._internal_testing runs supports_tma()/is_cuda() at import time, which JIT-builds
+    # backends/nvidia cuda_utils.c and needs CUDA headers (cuda.h), not just the runtime.
+    - {{ compiler('cuda') }}
+    - cuda-nvcc ={{ cuda_compiler_version }}
+    - cuda-nvrtc-dev
   source_files:
     - python/test
   commands:

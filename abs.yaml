@@ -4,6 +4,3 @@ build_parameters:
   - "--skip-existing"
   - "--error-overlinking"
   - "--no-test"
-
-build_env_vars:
-  ANACONDA_ROCKET_ENABLE_PY314 : yes

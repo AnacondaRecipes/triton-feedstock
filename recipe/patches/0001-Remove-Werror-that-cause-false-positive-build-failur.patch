@@ -7,16 +7,16 @@ Subject: [PATCH 1/4] Remove -Werror that cause false-positive build failures
  CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index de6ed2393..d8cadd8bf 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -143,7 +143,7 @@ endfunction()
+Index: triton-b4e20bbe55617cc798b986c2555a2bc7b303c737/CMakeLists.txt
+===================================================================
+--- triton-b4e20bbe55617cc798b986c2555a2bc7b303c737.orig/CMakeLists.txt
++++ triton-b4e20bbe55617cc798b986c2555a2bc7b303c737/CMakeLists.txt
+@@ -159,7 +159,7 @@ if(NOT MSVC)
+     # crash a Triton not compiled with visibility due to missing symbols.
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTRITON_EXT_ENABLED=1")
+   endif()
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-covered-switch-default ")
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-covered-switch-default ")
  
- # Disable warnings that show up in external code (gtest;pybind11)
- if(NOT MSVC)
--  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-covered-switch-default -fvisibility=hidden")
-+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-covered-switch-default -fvisibility=hidden")
  else()
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4624 /wd4715 /wd4530")
- endif()
