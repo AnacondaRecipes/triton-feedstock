@@ -1,0 +1,16 @@
+# Triton on aarch64 only builds CUDA 13.0 — matches pytorch 2.12 aarch64
+# coverage (pkgs/main has no gpu_cuda129 builds for aarch64). x86_64 still
+# builds both 12.9 and 13.0 to match the aggregate default.
+cuda_compiler_version:
+  - 12.9                       # [linux and x86_64]
+  - 13.0                       # [linux]
+
+# Triton's bundled LLVM links symbols requiring glibc 2.34 on aarch64.
+# x86_64 builds get away with the build.sh __glibcxx_assert_fail linker
+# stub for the one missing symbol; aarch64's missing-symbol surface is
+# wider, so opt this arch up to the 2.34 sysroot floor. Shipped binaries
+# will require customer glibc >= 2.34 on aarch64 (Rocky 9 / Ubuntu 22.04+).
+# x86_64 stays on the aggregate default (2.28) — no shipping-policy change
+# for existing customers.
+c_stdlib_version:
+  - "2.34"                     # [linux and aarch64]
