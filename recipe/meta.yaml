@@ -1,24 +1,23 @@
-{% set version = "3.7.0" %}
+{% set version = "3.7.1" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-  # Use the GitHub auto-archive instead of the official release tarball:
-  # triton-3.7.0.tar.gz (releases/download/...) is missing examples/plugins/,
-  # which CMakeLists.txt:342 references (add_subdirectory). The auto-archive
-  # contains the full repo tree. Triton has no real git submodules (backends
-  # nvidia/amd/proton are in-tree), so auto-archive works as the source.
+  # 3.7.1 added MANIFEST.in coverage for examples/ in the official release
+  # tarball (#10350), but stay on the GitHub auto-archive for consistency with
+  # the 3.7.0 recipe — Triton has no real git submodules (backends nvidia/amd/
+  # proton are in-tree), so auto-archive works as the source.
   url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: ff5cdcdd1b3f30a5db06c4e690ac73b16342c8181820e2cdf74e8514065ea7b8
+  sha256: 7d998625d1035ac496d06a81117727647169422ee67b8889609f06fd5367c491
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
     - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
 
 build:
-  number: 1
+  number: 0
   # TODO: windows support should be available from next version;
   #       CPU-only support still under development
   skip: true  # [win or cuda_compiler_version == "None"]
