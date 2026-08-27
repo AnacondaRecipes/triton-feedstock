@@ -24,7 +24,8 @@ build:
   # We only use this (and can test this) for pytorch, linux + x86_64 + GPU.
   # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) are availible to use upon release.
   skip: true  # [not (linux and x86_64)]
-  # Upstream caps support at py3.14 (setup.py MAX_PYTHON = (3, 14)).
+  # Upstream supports py3.10–3.14 (setup.py MIN_PYTHON=(3,10), MAX_PYTHON=(3,14)).
+  skip: true  # [py<310]
   skip: true  # [py>314]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
@@ -43,9 +44,9 @@ requirements:
     - pybind11-abi
     - pip
     - setuptools
-    - zlib
-    - nlohmann_json
-    - cuda-cupti-dev
+    - zlib {{ zlib }}
+    - nlohmann_json 3.12.0
+    - cuda-cupti-dev  # analint: host_section_needs_exact_pinnings  # floats with cuda-version; exact pin would break the multi-CUDA matrix
     - cuda-version {{ cuda_compiler_version }}
   run:
     - python
