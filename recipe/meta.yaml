@@ -1,16 +1,16 @@
-{% set version = "3.7.1" %}
+{% set version = "3.8.0" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-  # 3.7.1 added MANIFEST.in coverage for examples/ in the official release
-  # tarball (#10350), but stay on the GitHub auto-archive for consistency with
-  # the 3.7.0 recipe — Triton has no real git submodules (backends nvidia/amd/
-  # proton are in-tree), so auto-archive works as the source.
-  url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 7d998625d1035ac496d06a81117727647169422ee67b8889609f06fd5367c491
+  # No v3.8.0 tag exists upstream yet — pin the exact commit pytorch 2.14 uses
+  # for its triton 3.8.0 (this commit self-reports __version__ 3.8.0). git_rev is
+  # content-addressable (immune to archive regeneration). Triton has no real git
+  # submodules (backends nvidia/amd/proton are in-tree), so a plain checkout works.
+  git_url: https://github.com/triton-lang/triton.git
+  git_rev: 675c59878aa2280b31f722aaf42b825fcee21de8   # triton 3.8.0 = pytorch 2.14's pinned commit
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
@@ -24,6 +24,8 @@ build:
   # We only use this (and can test this) for pytorch, linux + x86_64 + GPU.
   # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) are availible to use upon release.
   skip: true  # [not (linux and x86_64)]
+  # Upstream caps support at py3.14 (setup.py MAX_PYTHON = (3, 14)).
+  skip: true  # [py>314]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:
@@ -33,6 +35,7 @@ requirements:
     - {{ stdlib('c') }}
     - ninja-base
     - cmake
+    - git                        # git_rev source checkout
   host:
     - python
     # upstream pyproject.toml requires pybind11>=2.13.1

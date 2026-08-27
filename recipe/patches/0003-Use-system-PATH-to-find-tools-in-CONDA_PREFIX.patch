@@ -8,7 +8,7 @@ Subject: [PATCH 3/5] Use system PATH to find tools (in CONDA_PREFIX)
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/python/triton/knobs.py b/python/triton/knobs.py
-index 161f739bd..d492b3a46 100644
+index 8670f12..95c16be 100644
 --- a/python/triton/knobs.py
 +++ b/python/triton/knobs.py
 @@ -4,6 +4,7 @@ import functools
@@ -18,8 +18,8 @@ index 161f739bd..d492b3a46 100644
 +import shutil
  import subprocess
  import sysconfig
- 
-@@ -204,9 +205,9 @@ class env_nvidia_tool(env_base[str, NvidiaTool]):
+ import pathlib
+@@ -207,9 +208,9 @@ class env_nvidia_tool(env_base[str, NvidiaTool]):
          # We still add default as fallback in case the pointed binary isn't
          # accessible.
          if path is not None:
@@ -28,6 +28,6 @@ index 161f739bd..d492b3a46 100644
          else:
 -            paths = [self.default_path]
 +            paths = [self.default_path, shutil.which(self.binary)]
- 
+
          for path in paths:
              if tool := NvidiaTool.from_path(path):
