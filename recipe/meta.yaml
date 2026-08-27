@@ -25,8 +25,7 @@ build:
   # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) are availible to use upon release.
   skip: true  # [not (linux and x86_64)]
   # Upstream supports py3.10–3.14 (setup.py MIN_PYTHON=(3,10), MAX_PYTHON=(3,14)).
-  skip: true  # [py<310]
-  skip: true  # [py>314]
+  skip: true  # [py<310 or py>314]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:
@@ -50,7 +49,6 @@ requirements:
     - cuda-version {{ cuda_compiler_version }}
   run:
     - python
-    - setuptools
     - cuda-nvcc-tools
     - cuda-cuobjdump
     - cuda-cudart
