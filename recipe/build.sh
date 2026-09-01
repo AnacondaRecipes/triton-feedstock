@@ -44,7 +44,10 @@ CMAKE_LLVM_ARGS=(
     -DLLVM_BUILD_TOOLS=OFF
     -DLLD_BUILD_TOOLS=OFF
     -DLLVM_BUILD_TELEMETRY=OFF
-    -DLLVM_ENABLE_PROJECTS="mlir;lld"
+    # clang is required: triton 3.8.0's nvidia backend find_program()s clang++ in
+    # ${LLVM_SYSPATH}/bin to compile its gsan device runtime (third_party/nvidia/
+    # CMakeLists.txt). Matches triton's own scripts/build-llvm-project.sh.
+    -DLLVM_ENABLE_PROJECTS="mlir;lld;clang"
     -DLLVM_TARGETS_TO_BUILD="host;NVPTX;AMDGPU"
     -DLLVM_ENABLE_TERMINFO=OFF
     -DLLVM_INCLUDE_TESTS=OFF
