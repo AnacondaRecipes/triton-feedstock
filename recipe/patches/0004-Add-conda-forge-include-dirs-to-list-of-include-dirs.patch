@@ -9,21 +9,22 @@ Subject: [PATCH 4/5] Add conda-forge include dirs to list of include dirs
  1 file changed, 22 insertions(+)
 
 diff --git a/python/triton/runtime/build.py b/python/triton/runtime/build.py
-index 2d0899603..e89f48877 100644
+index 3db9346..636a2e2 100644
 --- a/python/triton/runtime/build.py
 +++ b/python/triton/runtime/build.py
-@@ -5,8 +5,10 @@ import hashlib
+@@ -4,9 +4,11 @@ import functools
+ import hashlib
  import importlib.util
- import logging
  import os
 +import platform
+ import re
  import shutil
  import subprocess
 +import sys
  import sysconfig
  import tempfile
- 
-@@ -43,6 +45,26 @@ def _build(name: str, src: str, srcdir: str, library_dirs: list[str], include_di
+ import logging
+@@ -72,6 +74,26 @@ def _build(name: str, src: str, srcdir: str, library_dirs: list[str], include_di
      py_include_dir = sysconfig.get_paths(scheme=scheme)["include"]
      custom_backend_dirs = knobs.build.backend_dirs
      include_dirs = include_dirs + [srcdir, py_include_dir, *custom_backend_dirs]
@@ -49,4 +50,4 @@ index 2d0899603..e89f48877 100644
 +
      # for -Wno-psabi, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=111047
      cc_cmd = [cc, src, "-O3", "-shared", "-fPIC", "-Wno-psabi", "-o", so]
-     cc_cmd += [f'-l{lib}' for lib in libraries]
+     if language == "c++":

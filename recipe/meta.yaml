@@ -1,16 +1,12 @@
-{% set version = "3.7.1" %}
+{% set version = "3.8.0" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-  # 3.7.1 added MANIFEST.in coverage for examples/ in the official release
-  # tarball (#10350), but stay on the GitHub auto-archive for consistency with
-  # the 3.7.0 recipe — Triton has no real git submodules (backends nvidia/amd/
-  # proton are in-tree), so auto-archive works as the source.
   url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 7d998625d1035ac496d06a81117727647169422ee67b8889609f06fd5367c491
+  sha256: d50981f98bf61a5ce21d2a0c6ac067c20b7f741acf3bee4b8370edc3b63fd337
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
@@ -24,6 +20,8 @@ build:
   # We only use this (and can test this) for pytorch, linux + x86_64 + GPU.
   # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) are availible to use upon release.
   skip: true  # [not (linux and x86_64)]
+  # Upstream supports py3.10–3.14 (setup.py MIN_PYTHON=(3,10), MAX_PYTHON=(3,14)).
+  skip: true  # [py<310 or py>314]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
 
 requirements:
@@ -33,6 +31,11 @@ requirements:
     - {{ stdlib('c') }}
     - ninja-base
     - cmake
+    # setup.py's is_git_repo() probe shells out to `git` and upstream only catches
+    # CalledProcessError, not FileNotFoundError — so the git binary must be present
+    # even for tarball builds. Backends are in-tree (no .gitmodules), so nothing is
+    # actually fetched; git is only needed to keep the probe from crashing.
+    - git
   host:
     - python
     # upstream pyproject.toml requires pybind11>=2.13.1
@@ -40,13 +43,12 @@ requirements:
     - pybind11-abi
     - pip
     - setuptools
-    - zlib
-    - nlohmann_json
-    - cuda-cupti-dev
+    - zlib {{ zlib }}
+    - nlohmann_json 3.12.0
+    - cuda-cupti-dev  # analint: host_section_needs_exact_pinnings  # floats with cuda-version; exact pin would break the multi-CUDA matrix
     - cuda-version {{ cuda_compiler_version }}
   run:
     - python
-    - setuptools
     - cuda-nvcc-tools
     - cuda-cuobjdump
     - cuda-cudart
