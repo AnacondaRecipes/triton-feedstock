@@ -31,6 +31,11 @@ requirements:
     - {{ stdlib('c') }}
     - ninja-base
     - cmake
+    # setup.py's is_git_repo() probe shells out to `git` and upstream only catches
+    # CalledProcessError, not FileNotFoundError — so the git binary must be present
+    # even for tarball builds. Backends are in-tree (no .gitmodules), so nothing is
+    # actually fetched; git is only needed to keep the probe from crashing.
+    - git
   host:
     - python
     # upstream pyproject.toml requires pybind11>=2.13.1
