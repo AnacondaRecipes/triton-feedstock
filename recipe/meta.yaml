@@ -5,12 +5,8 @@ package:
   version: {{ version }}
 
 source:
-  # No v3.8.0 tag exists upstream yet — pin the exact commit pytorch 2.14 uses
-  # for its triton 3.8.0 (this commit self-reports __version__ 3.8.0). git_rev is
-  # content-addressable (immune to archive regeneration). Triton has no real git
-  # submodules (backends nvidia/amd/proton are in-tree), so a plain checkout works.
-  git_url: https://github.com/triton-lang/triton.git
-  git_rev: 675c59878aa2280b31f722aaf42b825fcee21de8   # triton 3.8.0 = pytorch 2.14's pinned commit
+  url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: d50981f98bf61a5ce21d2a0c6ac067c20b7f741acf3bee4b8370edc3b63fd337
   patches:
     - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
     - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
@@ -35,7 +31,6 @@ requirements:
     - {{ stdlib('c') }}
     - ninja-base
     - cmake
-    - git                        # git_rev source checkout
   host:
     - python
     # upstream pyproject.toml requires pybind11>=2.13.1
