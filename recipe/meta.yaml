@@ -1,19 +1,26 @@
 {% set version = "3.8.0" %}
+# LLVM commit triton 3.8.0 is built against (cmake/llvm-info.json). We build it
+# from source (second source entry below) for a hermetic build instead of
+# letting triton download its prebuilt LLVM image at build time.
+{% set llvm_commit = "5f07f818b51b786b0a87b4e514882600ecba112f" %}
 
 package:
   name: triton
   version: {{ version }}
 
 source:
-  url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: d50981f98bf61a5ce21d2a0c6ac067c20b7f741acf3bee4b8370edc3b63fd337
-  patches:
-    - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
-    - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
-    - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
+  - url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
+    sha256: d50981f98bf61a5ce21d2a0c6ac067c20b7f741acf3bee4b8370edc3b63fd337
+    patches:
+      - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
+      - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
+      - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
+  - url: https://github.com/llvm/llvm-project/archive/{{ llvm_commit }}.tar.gz
+    sha256: f2ebe182b09cbff08231bd2e15618a5dbe015770b5bdcd5ec29a6170813f2387
+    folder: llvm-project
 
 build:
-  number: 0
+  number: 1
   # TODO: windows support should be available from next version;
   #       CPU-only support still under development
   skip: true  # [win or cuda_compiler_version == "None"]
@@ -44,6 +51,7 @@ requirements:
     - pip
     - setuptools
     - zlib {{ zlib }}
+    - zstd {{ zstd }}                # required to build LLVM from source
     - nlohmann_json 3.12.0
     - cuda-cupti-dev  # analint: host_section_needs_exact_pinnings  # floats with cuda-version; exact pin would break the multi-CUDA matrix
     - cuda-version {{ cuda_compiler_version }}

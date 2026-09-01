@@ -1,3 +1,7 @@
+# Hermetic build compiles LLVM from source, which takes well over the default
+# 2h task cap; raise the per-task timeout accordingly.
+task_timeout: 18000
+
 # disable tests on initial build due to circular dependency with pytorch cuda.
 build_parameters:
   - "--suppress-variables"
