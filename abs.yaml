@@ -1,6 +1,6 @@
-# Hermetic build compiles LLVM from source, which takes well over the default
-# 2h task cap; raise the per-task timeout accordingly.
-task_timeout: 18000
+# Hermetic build compiles LLVM (+clang) from source. Observed ~1h15m, but
+# from-source builds vary by worker; a 3h cap gives margin over the default 2h.
+task_timeout: 10800
 
 # disable tests on initial build due to circular dependency with pytorch cuda.
 build_parameters:
