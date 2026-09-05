@@ -35,12 +35,14 @@ rm -rf *.egg-info/
 # --- Build LLVM from source (hermetic; replaces triton's prebuilt download) ---
 # Built BEFORE we set triton's assertion CXXFLAGS / stub LDFLAGS below, so LLVM
 # compiles with clean conda toolchain flags. Projects/targets are the minimal set
-# triton needs (mlir + lld; host + NVPTX for CUDA + AMDGPU). Flags modeled on
-# conda-forge's triton recipe.
+# triton needs (mlir + lld; host + NVPTX for CUDA). Flags modeled on conda-forge's
+# triton recipe, minus AMDGPU — we build the nvidia backend only (see
+# TRITON_CODEGEN_BACKENDS below), so LLVM's AMD codegen is unused.
 CMAKE_LLVM_ARGS=(
     -G Ninja
     -DCMAKE_BUILD_TYPE=Release
-    -DLLVM_BUILD_UTILS=ON
+    # LLVM_INCLUDE_TESTS is OFF (below), so LLVM's lit utilities aren't needed.
+    -DLLVM_BUILD_UTILS=OFF
     -DLLVM_BUILD_TOOLS=OFF
     -DLLD_BUILD_TOOLS=OFF
     -DLLVM_BUILD_TELEMETRY=OFF
@@ -48,7 +50,7 @@ CMAKE_LLVM_ARGS=(
     # ${LLVM_SYSPATH}/bin to compile its gsan device runtime (third_party/nvidia/
     # CMakeLists.txt). Matches triton's own scripts/build-llvm-project.sh.
     -DLLVM_ENABLE_PROJECTS="mlir;lld;clang"
-    -DLLVM_TARGETS_TO_BUILD="host;NVPTX;AMDGPU"
+    -DLLVM_TARGETS_TO_BUILD="host;NVPTX"
     -DLLVM_ENABLE_TERMINFO=OFF
     -DLLVM_INCLUDE_TESTS=OFF
     -DMLIR_INCLUDE_TESTS=OFF
@@ -87,5 +89,10 @@ export LDFLAGS="$SRC_DIR/glibcxx_assert_stub.o -L$BUILD_PREFIX/lib -Wl,-rpath,$B
 # the build does not run C++ unittests, and they implicitly fetch gtest
 # no easy way of passing this, not really worth a whole patch
 sed -i -e '/TRITON_BUILD_UT/s:\bON:OFF:' CMakeLists.txt
+
+# Build the nvidia backend only (upstream default is nvidia;amd). AR ships
+# NVIDIA-CUDA triton only, so dropping the amd backend trims build time and lets
+# us drop LLVM's AMDGPU target above.
+export TRITON_CODEGEN_BACKENDS=nvidia
 
 $PYTHON -m pip install . -vv --no-deps --no-build-isolation
