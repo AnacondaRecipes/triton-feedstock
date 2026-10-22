@@ -11,7 +11,6 @@ rm -rf $SRC_DIR/python/triton/third_party
 export TRITON_OFFLINE_BUILD=1
 
 export JSON_SYSPATH=$PREFIX
-export PYBIND11_SYSPATH=$SP_DIR/pybind11
 
 # only some of them are actually used currently, but set all just in case
 export TRITON_PTXAS_PATH=$PREFIX/bin/ptxas
@@ -44,7 +43,7 @@ CMAKE_LLVM_ARGS=(
     -DLLVM_BUILD_TOOLS=OFF
     -DLLD_BUILD_TOOLS=OFF
     -DLLVM_BUILD_TELEMETRY=OFF
-    # clang is required: triton 3.8.0's nvidia backend find_program()s clang++ in
+    # clang is required: triton's nvidia backend find_program()s clang++ in
     # ${LLVM_SYSPATH}/bin to compile its gsan device runtime (third_party/nvidia/
     # CMakeLists.txt). Matches triton's own scripts/build-llvm-project.sh.
     -DLLVM_ENABLE_PROJECTS="mlir;lld;clang"
@@ -59,6 +58,22 @@ cmake --build llvm-project/build -j "${MAX_JOBS}"
 export LLVM_SYSPATH=$PWD/llvm-project/build
 export LLVM_INCLUDE_DIRS=$LLVM_SYSPATH/include
 export LLVM_LIBRARY_DIR=$LLVM_SYSPATH/lib
+
+# --- AMD codegen library (new in 3.9) ---
+# Upstream downloads a prebuilt libtriton_amd_codegen.so built against a separate
+# AMD LLVM pin (cmake/amd-llvm-info.json), which fails offline. Build it from the
+# in-tree source against our LLVM above (AMDGPU target enabled) instead.
+AMD_CODEGEN_LIB=$SRC_DIR/third_party/amd/backend/lib/libtriton_amd_codegen.so
+# -Wl,-s for the same reason as libtriton.so below (statically-linked LLVM symbols).
+LDFLAGS="$LDFLAGS -Wl,-s" cmake -G Ninja -B amd-codegen-build -S third_party/amd/backend/codegen \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_DIR=$LLVM_SYSPATH/lib/cmake/llvm \
+    -DCMAKE_INSTALL_PREFIX=$SRC_DIR/amd-codegen-build/install \
+    -DTRITON_AMD_LLVM_REVISION=$($PYTHON -c "import json; print(json.load(open('cmake/llvm-info.json'))['llvm_hash'])")
+cmake --build amd-codegen-build --target install -j "${MAX_JOBS}"
+cp amd-codegen-build/install/lib/libtriton_amd_codegen.so $AMD_CODEGEN_LIB
+# Non-empty path makes build_helpers.py skip its download; the copy above is what ships.
+export TRITON_AMD_CODEGEN_PATH=$AMD_CODEGEN_LIB
 
 # --- Build triton against the freshly-built LLVM ---
 # GCC version missing __glibcxx_assert_fail function. We'll create a stub for it.
