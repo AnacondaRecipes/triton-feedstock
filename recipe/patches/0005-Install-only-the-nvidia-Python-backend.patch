@@ -1,0 +1,67 @@
+From 22c19c29bc125521881edfc74b86f3b86693d240 Mon Sep 17 00:00:00 2001
+From: xkong-anaconda <xkong@anaconda.com>
+Date: Thu, 22 Oct 2026 20:08:03 -0500
+Subject: [PATCH 5/5] Install only the nvidia Python backend
+
+AR builds triton for NVIDIA CUDA only. Keep compiling the amd C++ code into
+libtriton (proton's dialect and the LLVM link list need it), but do not install
+the amd Python backend or build its standalone libtriton_amd_codegen, which
+upstream pins to a separate AMD LLVM revision.
+---
+ python/build_helpers.py | 3 ++-
+ setup.py                | 9 ++++++---
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/python/build_helpers.py b/python/build_helpers.py
+index d90da6a..5fde796 100644
+--- a/python/build_helpers.py
++++ b/python/build_helpers.py
+@@ -811,7 +811,8 @@ def get_nvidia_toolchain_packages():
+ 
+ 
+ def download_and_copy_dependencies(helper_args: BuildHelperArgs):
+-    download_and_copy_amd_codegen(helper_args)
++    # conda packaging: the amd Python backend is not installed (see setup.py), so
++    # its standalone libtriton_amd_codegen is neither needed nor built.
+ 
+     for package in get_nvidia_toolchain_packages():
+         download_and_copy(
+diff --git a/setup.py b/setup.py
+index 2466aa3..8e74da8 100644
+--- a/setup.py
++++ b/setup.py
+@@ -399,12 +399,15 @@ class CMakeBuild(build_ext):
+ 
+ 
+ backends = [*BackendInstaller.copy(["nvidia", "amd"]), *BackendInstaller.copy_externals()]
++# conda packaging: the amd C++ code is still compiled into libtriton (proton's dialect
++# and the LLVM link list need it), but only the nvidia Python backend is installed.
++python_backends = [b for b in backends if b.name != "amd"]
+ 
+ 
+ def get_package_dirs():
+     yield ("", "python")
+ 
+-    for backend in backends:
++    for backend in python_backends:
+         # we use symlinks for external plugins
+         if backend.is_external:
+             continue
+@@ -431,7 +434,7 @@ def get_package_dirs():
+ def get_packages():
+     yield from find_packages(where="python")
+ 
+-    for backend in backends:
++    for backend in python_backends:
+         yield f"triton.backends.{backend.name}"
+ 
+         if backend.language_dir:
+@@ -545,7 +548,7 @@ def get_entry_points():
+             "proton-viewer = triton.profiler.viewer:main",
+             "proton = triton.profiler.proton:main",
+         ]
+-    entry_points["triton.backends"] = [f"{b.name} = triton.backends.{b.name}" for b in backends]
++    entry_points["triton.backends"] = [f"{b.name} = triton.backends.{b.name}" for b in python_backends]
+     return entry_points
+ 
+ 
