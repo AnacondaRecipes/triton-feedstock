@@ -1,8 +1,8 @@
-{% set version = "3.8.0" %}
-# LLVM commit triton 3.8.0 is built against (cmake/llvm-info.json). We build it
+{% set version = "3.9.0" %}
+# LLVM commit triton 3.9.0 is built against (cmake/llvm-info.json). We build it
 # from source (second source entry below) for a hermetic build instead of
 # letting triton download its prebuilt LLVM image at build time.
-{% set llvm_commit = "5f07f818b51b786b0a87b4e514882600ecba112f" %}
+{% set llvm_commit = "b010a18d2b648cab83c83967ff26b8fde11acdc6" %}
 
 package:
   name: triton
@@ -10,26 +10,32 @@ package:
 
 source:
   - url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
-    sha256: d50981f98bf61a5ce21d2a0c6ac067c20b7f741acf3bee4b8370edc3b63fd337
+    sha256: 78fc9ff4403a856dce609c8529b6f341a7aaf331c2582ed7167949b40f864cd5
     patches:
       - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
       - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
       - patches/0004-Add-conda-forge-include-dirs-to-list-of-include-dirs.patch
+      - patches/0005-Install-only-the-nvidia-Python-backend.patch
   - url: https://github.com/llvm/llvm-project/archive/{{ llvm_commit }}.tar.gz
-    sha256: f2ebe182b09cbff08231bd2e15618a5dbe015770b5bdcd5ec29a6170813f2387
+    sha256: 975ad64f584955a714bddd1a3413db14ba3c8cca8292dc020ab58ac4c09decad
     folder: llvm-project
+  # nlohmann_json (host, header-only, compiled into libproton) ships its MIT text only in its info/ dir
+  - url: https://raw.githubusercontent.com/nlohmann/json/v3.12.0/LICENSE.MIT
+    sha256: 46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603
+    folder: host-licenses/nlohmann_json
 
 build:
-  number: 1
-  # TODO: windows support should be available from next version;
-  #       CPU-only support still under development
-  skip: true  # [win or cuda_compiler_version == "None"]
-  # We only use this (and can test this) for pytorch, linux + x86_64 + GPU.
-  # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) are availible to use upon release.
-  skip: true  # [not (linux and x86_64)]
-  # Upstream supports py3.10–3.14 (setup.py MIN_PYTHON=(3,10), MAX_PYTHON=(3,14)).
-  skip: true  # [py<310 or py>314]
+  number: 0
+  # We only use this (and can test this) for pytorch: linux + x86_64 + NVIDIA GPU.
+  # Upstream lists only Linux as a supported platform (no Windows wheels); CPU support is under development.
+  # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) is available.
+  # Upstream supports py3.11–3.15 (setup.py MIN_PYTHON=(3,11), MAX_PYTHON=(3,15)).
+  skip: true  # [not (linux and x86_64) or cuda_compiler_version == "None" or py<311 or py>315]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
+  # upstream setup.py console_scripts
+  entry_points:
+    - proton = triton.profiler.proton:main
+    - proton-viewer = triton.profiler.viewer:main
 
 requirements:
   build:
@@ -37,7 +43,8 @@ requirements:
     - {{ compiler('cuda') }}
     - {{ stdlib('c') }}
     - ninja-base
-    - cmake
+    # upstream pyproject.toml requires cmake>=3.20,<4.0
+    - cmake >=3.20,<4.0
     # setup.py's is_git_repo() probe shells out to `git` and upstream only catches
     # CalledProcessError, not FileNotFoundError — so the git binary must be present
     # even for tarball builds. Backends are in-tree (no .gitmodules), so nothing is
@@ -45,9 +52,9 @@ requirements:
     - git
   host:
     - python
-    # upstream pyproject.toml requires pybind11>=2.13.1
-    - pybind11 >=2.13.1
-    - pybind11-abi
+    # upstream pyproject.toml requires nanobind==2.10.2
+    - nanobind 2.10.2
+    - nanobind-abi 17  # NB_INTERNALS_VERSION of nanobind 2.10.2; run_exports pins it at runtime
     - pip
     - setuptools
     - zlib {{ zlib }}
@@ -62,53 +69,63 @@ requirements:
     - cuda-cudart
     - cuda-cupti
 
-# Note that PyTorch is a test dependency here, and Triton is a dependency of (the CUDA variant of) PyTorch.
-# So, you need to build Triton without running the tests (`conda build --no-test`), then build PyTorch, then run these tests.
+# The upstream pytest suite needs pytorch (whose CUDA build depends on triton) and a
+# GPU; PyTorch's own tests cover that. These tests need neither.
 test:
   imports:
     - triton
     - triton._C.libtriton
+    - triton.backends.nvidia.compiler
   requires:
     - pip
-    - pytest
-    - expecttest
-    - scipy
-    - pytorch=*=*cuda*
-    # triton._internal_testing runs supports_tma()/is_cuda() at import time, which JIT-builds
-    # backends/nvidia cuda_utils.c and needs CUDA headers (cuda.h), not just the runtime.
-    - {{ compiler('cuda') }}
-    - cuda-nvcc ={{ cuda_compiler_version }}
-    - cuda-nvrtc-dev
-  source_files:
-    - python/test
   commands:
     - pip check
-    # test suite essentially depends on availability of a physical GPU,
-    # see https://github.com/triton-lang/triton/issues/466;
-    # run a test that does not require a GPU but checks
-    # if triton.compile() works
-    - TRITON_INTERPRET=1 pytest -v python/test/unit/tools/test_aot.py::test_ttgir_to_asm
-    # Here is a list of current test failures and reasoning why they're ok:
-    #
-    # test_dummy_backend                    - looks like it's using CUDA instead of CPU backend for this test, for some reason. We don't need to use the CPU backend anyway.
-    # IndexError: map::at errors            - known issue for T4 GPUs https://github.com/triton-lang/triton/issues/3787
-    # out of resource: shared memory errors - fine, just platform resource is less than expected
-    # test_print[device_print_large-int32]  - assert False - looks like a print output error, works fine for other data types, should be ok
-    # test_compile_in_forked_subproc        - AssertionError: assert 1 == 0 - also an IndexError: map::at output (shown in the stderr output)
-    #
-    # In general, the more important tests are the PyTorch tests. This package only supports PyTorch. See text at the top of the recipe.
-    #
-    # the test_performance tests are broken for compute capability 7.x, which applies to our current build instances.
-    # test_device_backend is also broken, attempting to import from triton.common which was removed.
-    # Skipping python/test/unit tests due to configuration conflict with duplicate --device parameter (there's probably a different
-    # way around this, but for now skipping is sufficient to reach the more interesting tests).
-    - pytest -v python/test --ignore=python/test/regression/test_performance.py --ignore=python/test/backend/test_device_backend.py --ignore=python/test/unit || true
+    # proton-viewer is not run: it needs pandas and llnl-hatchet, which upstream leaves optional
+    - proton --help
+    - test -f $SP_DIR/triton/backends/nvidia/lib/libdevice.10.bc
+    - test ! -d $SP_DIR/triton/backends/amd
+    # Compile (no GPU needed) for sm_80 and sm_90: runs libtriton's MLIR/LLVM pipeline
+    # and ptxas. arch >= 90 asks for ptxas-blackwell, which patch 0003 maps to ptxas.
+    - |
+      python - <<'EOF'
+      import os, tempfile, triton
+      from triton.backends.compiler import GPUTarget
+      src = """
+      module attributes {"ttg.num-warps" = 4 : i32, "ttg.threads-per-warp" = 32 : i32, "ttg.num-ctas" = 1 : i32} {
+        tt.func public @empty_kernel(%arg0: !tt.ptr<i32>) {
+          tt.return
+        }
+      }
+      """
+      for arch in (80, 90):
+          with tempfile.TemporaryDirectory() as tmp:
+              path = os.path.join(tmp, "empty_kernel.ttgir")
+              with open(path, "w") as f:
+                  f.write(src)
+              k = triton.compile(path, target=GPUTarget("cuda", arch, 32))
+              assert f".target sm_{arch}" in k.asm["ptx"], arch
+              assert k.asm["cubin"], arch
+      EOF
 
 about:
   home: https://github.com/triton-lang/triton
-  license: MIT
-  license_family: MIT
-  license_file: LICENSE
+  # triton (MIT) with statically linked LLVM/MLIR/lld (Apache-2.0 WITH LLVM-exception) and
+  # LLVM's third-party Support routines (xxhash BSD-2-Clause, ConvertUTF Unicode-DFS-2015,
+  # regex BSD-3-Clause, strlcpy ISC), f2reduce (MIT), nanobind (BSD-3-Clause), nanobind's
+  # robin_map (MIT) and nlohmann_json (MIT, compiled into libproton)
+  license: MIT AND Apache-2.0 WITH LLVM-exception AND BSD-3-Clause AND BSD-2-Clause AND ISC AND Unicode-DFS-2015
+  license_family: Other
+  license_file:
+    - LICENSE
+    - llvm-project/llvm/LICENSE.TXT
+    - llvm-project/mlir/LICENSE.TXT
+    - llvm-project/lld/LICENSE.TXT
+    - third_party/f2reduce/LICENCE.txt
+    - host-licenses/nanobind-LICENSE          # copied in build.sh
+    - host-licenses/robin_map-LICENSE         # extracted in build.sh
+    - host-licenses/nlohmann_json/LICENSE.MIT  # source entry
+    - host-licenses/nlohmann_json-COPYRIGHTS  # collected in build.sh
+    - host-licenses/llvm-support-LICENSES     # extracted in build.sh
   summary: Development repository for the Triton language and compiler
   description: |
     This is the development repository of Triton, a language and compiler for writing highly efficient custom Deep-Learning primitives.

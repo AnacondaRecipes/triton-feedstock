@@ -8,10 +8,10 @@ Subject: [PATCH 1/4] Remove -Werror that cause false-positive build failures
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3f066ea..2c59ce2 100644
+index 9787d3e..1713a47 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -282,7 +282,7 @@ if(NOT MSVC)
+@@ -294,7 +294,7 @@ if(NOT MSVC)
      # crash a Triton not compiled with visibility due to missing symbols.
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTRITON_EXT_ENABLED=1")
    endif()

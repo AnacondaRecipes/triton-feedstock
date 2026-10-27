@@ -3,12 +3,14 @@ From: =?UTF-8?q?Micha=C5=82=20G=C3=B3rny?= <mgorny@quansight.com>
 Date: Fri, 1 Aug 2025 13:31:58 +0200
 Subject: [PATCH 3/5] Use system PATH to find tools (in CONDA_PREFIX)
 
+Also resolve ptxas-blackwell (used for arch >= 90 since triton 3.9) to the
+conda ptxas, and skip tools that are not on PATH.
 ---
- python/triton/knobs.py | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ python/triton/knobs.py | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/python/triton/knobs.py b/python/triton/knobs.py
-index 8670f12..95c16be 100644
+index 836b011..94163ae 100644
 --- a/python/triton/knobs.py
 +++ b/python/triton/knobs.py
 @@ -4,6 +4,7 @@ import functools
@@ -19,7 +21,7 @@ index 8670f12..95c16be 100644
  import subprocess
  import sysconfig
  import pathlib
-@@ -207,9 +208,9 @@ class env_nvidia_tool(env_base[str, NvidiaTool]):
+@@ -207,12 +208,17 @@ class env_nvidia_tool(env_base[str, NvidiaTool]):
          # We still add default as fallback in case the pointed binary isn't
          # accessible.
          if path is not None:
@@ -28,6 +30,15 @@ index 8670f12..95c16be 100644
          else:
 -            paths = [self.default_path]
 +            paths = [self.default_path, shutil.which(self.binary)]
-
++        # conda's CUDA packages ship one `ptxas` for all architectures and no
++        # `ptxas-blackwell`, which get_ptxas() requests for arch >= 90.
++        if self.binary.startswith("ptxas-blackwell"):
++            paths.append(shutil.which(self.binary.replace("ptxas-blackwell", "ptxas")))
+ 
          for path in paths:
-             if tool := NvidiaTool.from_path(path):
+-            if tool := NvidiaTool.from_path(path):
++            # Skip None from failed shutil.which() lookups; from_path(None) raises TypeError.
++            if path and (tool := NvidiaTool.from_path(path)):
+                 return tool
+ 
+         raise RuntimeError(f"Cannot find {self.binary}")

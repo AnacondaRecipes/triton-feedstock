@@ -2,9 +2,10 @@
 # from-source builds vary by worker; a 3h cap gives margin over the default 2h.
 task_timeout: 10800
 
-# disable tests on initial build due to circular dependency with pytorch cuda.
+build_env_vars:
+  ANACONDA_ROCKET_ENABLE_PY315 : yes
+
 build_parameters:
   - "--suppress-variables"
   - "--skip-existing"
   - "--error-overlinking"
-  - "--no-test"
