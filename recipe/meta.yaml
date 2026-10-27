@@ -22,13 +22,16 @@ source:
   - url: https://github.com/llvm/llvm-project/archive/{{ llvm_commit }}.tar.gz
     sha256: 975ad64f584955a714bddd1a3413db14ba3c8cca8292dc020ab58ac4c09decad
     folder: llvm-project
+  # nlohmann_json (host, header-only, compiled into libproton) ships its MIT text only in its info/ dir
+  - url: https://raw.githubusercontent.com/nlohmann/json/v3.12.0/LICENSE.MIT
+    sha256: 46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603
+    folder: host-licenses/nlohmann_json
 
 build:
   number: 0
   # We only use this (and can test this) for pytorch: linux + x86_64 + NVIDIA GPU.
-  # TODO: windows support should be available from next version; CPU-only support
-  #       still under development. Await support on CI for aarch64 when 2.34 GLIBC
-  #       (Rocky Linux 9) is available.
+  # Upstream lists only Linux as a supported platform (no Windows wheels); CPU support is under development.
+  # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) is available.
   # Upstream supports py3.11–3.15 (setup.py MIN_PYTHON=(3,11), MAX_PYTHON=(3,15)).
   skip: true  # [not (linux and x86_64) or cuda_compiler_version == "None" or py<311 or py>315]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
@@ -109,16 +112,23 @@ test:
 
 about:
   home: https://github.com/triton-lang/triton
-  # triton (MIT) with statically linked LLVM/MLIR/lld (Apache-2.0 WITH LLVM-exception),
-  # f2reduce (MIT), nanobind (BSD-3-Clause) and nanobind's robin_map (MIT)
-  license: MIT AND Apache-2.0 WITH LLVM-exception AND BSD-3-Clause
+  # triton (MIT) with statically linked LLVM/MLIR/lld (Apache-2.0 WITH LLVM-exception) and
+  # LLVM's third-party Support routines (xxhash BSD-2-Clause, ConvertUTF Unicode-DFS-2015,
+  # regex BSD-3-Clause, strlcpy ISC), f2reduce (MIT), nanobind (BSD-3-Clause), nanobind's
+  # robin_map (MIT) and nlohmann_json (MIT, compiled into libproton)
+  license: MIT AND Apache-2.0 WITH LLVM-exception AND BSD-3-Clause AND BSD-2-Clause AND ISC AND Unicode-DFS-2015
   license_family: Other
   license_file:
     - LICENSE
     - llvm-project/llvm/LICENSE.TXT
+    - llvm-project/mlir/LICENSE.TXT
+    - llvm-project/lld/LICENSE.TXT
     - third_party/f2reduce/LICENCE.txt
-    - host-licenses/nanobind-LICENSE   # copied in build.sh
-    - host-licenses/robin_map-LICENSE  # extracted in build.sh
+    - host-licenses/nanobind-LICENSE          # copied in build.sh
+    - host-licenses/robin_map-LICENSE         # extracted in build.sh
+    - host-licenses/nlohmann_json/LICENSE.MIT  # source entry
+    - host-licenses/nlohmann_json-COPYRIGHTS  # collected in build.sh
+    - host-licenses/llvm-support-LICENSES     # extracted in build.sh
   summary: Development repository for the Triton language and compiler
   description: |
     This is the development repository of Triton, a language and compiler for writing highly efficient custom Deep-Learning primitives.

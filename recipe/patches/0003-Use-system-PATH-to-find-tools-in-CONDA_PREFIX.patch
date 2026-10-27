@@ -37,7 +37,7 @@ index 836b011..94163ae 100644
  
          for path in paths:
 -            if tool := NvidiaTool.from_path(path):
-+            # shutil.which() returns None when the tool is not on PATH
++            # Skip None from failed shutil.which() lookups; from_path(None) raises TypeError.
 +            if path and (tool := NvidiaTool.from_path(path)):
                  return tool
  

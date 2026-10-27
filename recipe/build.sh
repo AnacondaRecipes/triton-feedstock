@@ -92,5 +92,31 @@ cp $SP_DIR/nanobind-*.dist-info/licenses/LICENSE host-licenses/nanobind-LICENSE
 # robin_map's MIT notice is only shipped as the header comment of robin_map.h
 sed -n '2,/^ \*\/$/p' $SP_DIR/nanobind/ext/robin_map/include/tsl/robin_map.h \
     | sed -e '$d' -e 's/^ \* \{0,1\}//' > host-licenses/robin_map-LICENSE
+# nlohmann_json (header-only, compiled into libproton): its MIT text comes from a source
+# entry; collect the copyright holders named in its headers
+(
+  set -o pipefail
+  grep -rh '^// SPDX-FileCopyrightText:' "$PREFIX/include/nlohmann" \
+    | sed 's|^// ||' | LC_ALL=C sort -u \
+    > host-licenses/nlohmann_json-COPYRIGHTS
+)
+test -s host-licenses/nlohmann_json/LICENSE.MIT
+test -s host-licenses/nlohmann_json-COPYRIGHTS
+# Separately licensed LLVM Support sources compiled into the shipped binaries; LLVM's
+# LICENSE.TXT says such code carries its own notice in the file header
+"$PYTHON" - <<'PY'
+from pathlib import Path
+
+support = Path('llvm-project/llvm/lib/Support')
+names = ('xxhash.cpp', 'ConvertUTF.cpp', 'regcomp.c', 'regerror.c',
+         'regexec.c', 'regfree.c', 'regstrlcpy.c')
+parts = ['These sources include modifications made by the LLVM Project.\n']
+for name in names:
+    path = support / name
+    text = path.read_text().split('#include', 1)[0]
+    assert text.strip() and 'copyright' in text.lower(), path
+    parts.append('\n' + str(path) + '\n' + text)
+Path('host-licenses/llvm-support-LICENSES').write_text(''.join(parts))
+PY
 
 $PYTHON -m pip install . -vv --no-deps --no-build-isolation
