@@ -1,7 +1,4 @@
 {% set version = "3.9.0" %}
-# Pre-release pin: no v3.9.0 tag yet. PyTorch 2.15 pins this release/3.9.x commit
-# (.ci/docker/ci_commit_pins/triton.txt). Switch to the v3.9.0 tag before merge.
-{% set commit = "aad2a60d958f945420c5c40936b37d411fb02e89" %}
 # LLVM commit triton 3.9.0 is built against (cmake/llvm-info.json). We build it
 # from source (second source entry below) for a hermetic build instead of
 # letting triton download its prebuilt LLVM image at build time.
@@ -12,8 +9,8 @@ package:
   version: {{ version }}
 
 source:
-  - url: https://github.com/triton-lang/triton/archive/{{ commit }}.tar.gz
-    sha256: afbe1e2f172f3f95f6b58d2ff1006bb0388416de6f966ac7884ea1345f3286f9
+  - url: https://github.com/triton-lang/triton/archive/refs/tags/v{{ version }}.tar.gz
+    sha256: 78fc9ff4403a856dce609c8529b6f341a7aaf331c2582ed7167949b40f864cd5
     patches:
       - patches/0001-Remove-Werror-that-cause-false-positive-build-failur.patch
       - patches/0003-Use-system-PATH-to-find-tools-in-CONDA_PREFIX.patch
