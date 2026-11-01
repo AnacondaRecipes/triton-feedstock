@@ -26,11 +26,11 @@ source:
 
 build:
   number: 0
-  # We only use this (and can test this) for pytorch: linux + x86_64 + NVIDIA GPU.
+  # We only use this (and can test this) for pytorch: linux + NVIDIA GPU.
   # Upstream lists only Linux as a supported platform (no Windows wheels); CPU support is under development.
-  # TODO: Await support on CI for aarch64 when 2.34 GLIBC (Rocky Linux 9) is available.
+  # linux-aarch64 builds CUDA 13.0 only, matching pytorch's one aarch64 GPU variant (gpu_cuda130).
   # Upstream supports py3.11–3.15 (setup.py MIN_PYTHON=(3,11), MAX_PYTHON=(3,15)).
-  skip: true  # [not (linux and x86_64) or cuda_compiler_version == "None" or py<311 or py>315]
+  skip: true  # [not linux or cuda_compiler_version == "None" or (aarch64 and cuda_compiler_version != "13.0") or py<311 or py>315]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}
   # upstream setup.py console_scripts
   entry_points:
