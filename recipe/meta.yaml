@@ -25,7 +25,7 @@ source:
     folder: host-licenses/nlohmann_json
 
 build:
-  number: 0
+  number: 1
   # We only use this (and can test this) for pytorch: linux + NVIDIA GPU.
   # Upstream lists only Linux as a supported platform (no Windows wheels); CPU support is under development.
   # linux-aarch64 builds CUDA 13.0 only, matching pytorch's one aarch64 GPU variant (gpu_cuda130).
